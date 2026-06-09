@@ -1,59 +1,132 @@
-import { headers as getHeaders } from 'next/headers.js'
-import Image from 'next/image'
 import { getPayload } from 'payload'
-import React from 'react'
-import { fileURLToPath } from 'url'
-
 import config from '@/payload.config'
 import './styles.css'
 
 export default async function HomePage() {
-  const headers = await getHeaders()
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
+  const payload = await getPayload({ config })
 
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
+  const pagesData = await payload.find({
+    collection: 'pages',
+    limit: 1,
+  })
+
+  const statsData = await payload.find({
+    
+    collection: 'stats',
+    sort: 'order',
+  })
+  const servicesData = await payload.find({
+  collection: 'services',
+})
+const teamData = await payload.find({
+  collection: 'team-members',
+  sort: 'order',
+})
+  const projectsData = await payload.find({
+    collection: 'projects',
+    where: {
+      featured: {
+        equals: true,
+      },
+    },
+    limit: 3,
+  })
+
+  const page = pagesData.docs[0]
 
   return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
-          </a>
+    <main className="homepage">
+      <nav className="navbar">
+  <div className="logo">The Prospective Interiors</div>
+
+  <div className="nav-links">
+    <a href="/">Home</a>
+    <a href="/projects">Projects</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</nav>
+      {/* Hero Section */}
+      <section className="hero">
+        <h1>{page?.heroHeadline}</h1>
+        <p>{page?.heroSubtext}</p>
+      </section>
+
+      {/* Stats Section */}
+      <section className="stats">
+        {statsData.docs.map((stat) => (
+          <div key={stat.id} className="stat-card">
+            <h2>{stat.value}</h2>
+            <p>{stat.label}</p>
+          </div>
+        ))}
+      </section>
+<section className="services">
+  <h2>Our Services</h2>
+
+  <div className="services-grid">
+    {servicesData.docs.map((service) => (
+      <div key={service.id} className="service-card">
+        <h3>{service.title}</h3>
+      </div>
+    ))}
+  </div>
+</section>
+      {/* Featured Projects */}
+      <section className="projects">
+        <h2>Featured Projects</h2>
+
+        <div className="project-grid">
+          {projectsData.docs.map((project) => (
+            <div key={project.id} className="project-card">
+              <h3>{project.title}</h3>
+
+              <p>
+                {project.sector} • {project.location}
+              </p>
+
+              <p>{project.client}</p>
+            </div>
+          ))}
         </div>
+      </section>
+{/* Team Section */}
+<section className="team">
+  <h2>Our Team</h2>
+
+  <div className="team-grid">
+    {teamData.docs.map((member) => (
+      <div key={member.id} className="team-card">
+        <h3>{member.name}</h3>
+        <p>{member.role}</p>
+        <p>{member.bio}</p>
       </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
-      </div>
-    </div>
+    ))}
+  </div>
+</section>
+      {/* Philosophy */}
+      <section className="philosophy">
+        <h2>Our Philosophy</h2>
+        <p>{page?.philosophyText}</p>
+      </section>
+
+      {/* CTA */}
+      <section className="cta">
+        <a href="/projects">View Projects</a>
+      </section>
+      <footer className="footer">
+  <h3>The Prospective Interiors</h3>
+
+  <div className="footer-links">
+    <a href="/">Home</a>
+    <a href="/projects">Projects</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+
+  <p>© 2026 The Prospective Interiors</p>
+</footer>
+    </main>
   )
+
 }
