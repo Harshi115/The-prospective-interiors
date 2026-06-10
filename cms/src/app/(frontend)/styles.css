@@ -260,3 +260,91 @@ body {
 .philosophy {
   border-top: 1px solid #222;
 }
+.about-page {
+  min-height: 100vh;
+}
+
+.about-hero {
+  padding: 80px;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.about-hero p {
+  max-width: 800px;
+  line-height: 1.8;
+  color: #bbb;
+}
+
+.about-stats {
+  padding: 80px;
+}
+
+.about-stats h2 {
+  margin-bottom: 30px;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.about-team {
+  padding: 80px;
+}
+
+.about-team h2 {
+  margin-bottom: 30px;
+}
+.contact-page {
+  min-height: 100vh;
+}
+
+.contact-hero {
+  padding: 80px;
+}
+
+.contact-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.contact-hero p {
+  color: #bbb;
+  max-width: 700px;
+}
+
+.contact-form-section {
+  padding: 80px;
+}
+
+.contact-form {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1c1c1c;
+  color: white;
+}
+
+.contact-form button {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
