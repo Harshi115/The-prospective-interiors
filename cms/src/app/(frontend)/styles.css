@@ -117,9 +117,14 @@ body {
   background: white;
   color: black;
   text-decoration: none;
-  padding: 15px 30px;
-  border-radius: 8px;
+  padding: 16px 32px;
+  border-radius: 10px;
   font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cta a:hover {
+  background: #d6d6d6;
 }
 .services {
   padding: 80px;
@@ -237,4 +242,21 @@ body {
     flex-direction: column;
     gap: 10px;
   }
+}
+.project-card,
+.service-card,
+.team-card {
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover,
+.service-card:hover,
+.team-card:hover {
+  transform: translateY(-5px);
+}
+.services,
+.projects,
+.team,
+.philosophy {
+  border-top: 1px solid #222;
 }

@@ -78,15 +78,15 @@ const teamData = await payload.find({
 
         <div className="project-grid">
           {projectsData.docs.map((project) => (
-            <div key={project.id} className="project-card">
-              <h3>{project.title}</h3>
+  <div key={project.id} className="project-card">
+  <h3>{project.title}</h3>
 
-              <p>
-                {project.sector} • {project.location}
-              </p>
+  {project.sector && <p>Sector: {project.sector}</p>}
 
-              <p>{project.client}</p>
-            </div>
+  {project.location && <p>Location: {project.location}</p>}
+
+  {project.client && <p>Client: {project.client}</p>}
+</div>
           ))}
         </div>
       </section>
