@@ -1,6 +1,8 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import './styles.css'
+import Navbar from '@/components/navbar'
+import Footer from '@/components/Footer'
 
 export default async function HomePage() {
   const payload = await getPayload({ config })
@@ -36,21 +38,32 @@ const teamData = await payload.find({
 
   return (
     <main className="homepage">
-      <nav className="navbar">
-  <div className="logo">The Prospective Interiors</div>
+   <Navbar />
 
-  <div className="nav-links">
-    <a href="/">Home</a>
-    <a href="/projects">Projects</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-  </div>
-</nav>
+
+
       {/* Hero Section */}
       <section className="hero">
-        <h1>{page?.heroHeadline}</h1>
-        <p>{page?.heroSubtext}</p>
-      </section>
+  <div className="hero-content">
+    <p className="hero-tagline">
+      Interior Design • Project Management • Execution
+    </p>
+
+    <h1>{page?.heroHeadline}</h1>
+
+    <p>{page?.heroSubtext}</p>
+
+    <div className="hero-buttons">
+      <a href="/projects" className="primary-btn">
+        View Projects
+      </a>
+
+      <a href="/contact" className="secondary-btn">
+        Contact Us
+      </a>
+    </div>
+  </div>
+</section>
 
       {/* Stats Section */}
       <section className="stats">
@@ -61,6 +74,45 @@ const teamData = await payload.find({
           </div>
         ))}
       </section>
+
+{/* Process Section */}
+<section className="process">
+  <h2>Our Process</h2>
+
+  <div className="process-grid">
+    <div className="process-card">
+      <span>01</span>
+      <h3>Discovery</h3>
+      <p>Understanding client goals, requirements and vision.</p>
+    </div>
+
+    <div className="process-card">
+      <span>02</span>
+      <h3>Concept Design</h3>
+      <p>Developing layouts, concepts and design direction.</p>
+    </div>
+
+    <div className="process-card">
+      <span>03</span>
+      <h3>Planning</h3>
+      <p>Detailed planning, budgeting and material selection.</p>
+    </div>
+
+    <div className="process-card">
+      <span>04</span>
+      <h3>Execution</h3>
+      <p>Coordinating teams and delivering quality workmanship.</p>
+    </div>
+
+    <div className="process-card">
+      <span>05</span>
+      <h3>Delivery</h3>
+      <p>Final handover with complete project satisfaction.</p>
+    </div>
+  </div>
+</section>
+
+
 <section className="services">
   <h2>Our Services</h2>
 

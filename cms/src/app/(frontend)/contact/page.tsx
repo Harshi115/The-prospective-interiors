@@ -49,7 +49,27 @@ export default function ContactPage() {
       </section>
 
       <section className="contact-form-section">
-        <form className="contact-form" onSubmit={handleSubmit}>
+
+  <div className="contact-info">
+    <h2>Book a Consultation</h2>
+
+    <div className="info-card">
+      <h3>📞 Phone</h3>
+      <p>+91 98765 43210</p>
+    </div>
+
+    <div className="info-card">
+      <h3>✉️ Email</h3>
+      <p>hello@theprospectiveinteriors.com</p>
+    </div>
+
+    <div className="info-card">
+      <h3>📍 Location</h3>
+      <p>Pune, Maharashtra, India</p>
+    </div>
+  </div>
+
+  <form className="contact-form" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Your Name"

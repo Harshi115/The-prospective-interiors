@@ -2,19 +2,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px 80px;
+  padding: 20px 80px;
   background: #111;
   border-bottom: 1px solid #222;
 }
 
 .logo {
-  font-size: 1.3rem;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 90px;
+  width: auto;
+  display: block;
 }
 
 .nav-links {
   display: flex;
-  gap: 25px;
+  align-items: center;
+  gap: 30px;
 }
 
 .nav-links a {
@@ -54,6 +61,51 @@ body {
   margin-top: 20px;
   font-size: 1.2rem;
   color: #bbb;
+}
+.hero-content {
+  max-width: 900px;
+}
+
+.hero-tagline {
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.hero-buttons {
+  margin-top: 35px;
+  display: flex;
+  gap: 20px;
+}
+
+.primary-btn {
+  background: #d4af37;
+  color: black;
+  text-decoration: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  text-decoration: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  transition: 0.3s ease;
+}
+
+.secondary-btn:hover {
+  background: #d4af37;
+  color: black;
 }
 
 .stats {
@@ -204,19 +256,34 @@ body {
     gap: 15px;
     padding: 20px;
   }
+  .process-grid {
+  grid-template-columns: 1fr;
+}
+.contact-form-section {
+  grid-template-columns: 1fr;
+}
 
   .nav-links {
     flex-wrap: wrap;
     justify-content: center;
   }
-
-  .hero {
-    padding: 40px 20px;
-  }
+.hero {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+  background: linear-gradient(
+    rgba(15, 15, 15, 0.9),
+    rgba(15, 15, 15, 0.9)
+  );
+}
 
   .hero h1 {
     font-size: 2.5rem;
   }
+  .hero-buttons {
+  flex-direction: column;
+}
 
   .stats {
     flex-direction: column;
@@ -300,51 +367,116 @@ body {
 .about-team h2 {
   margin-bottom: 30px;
 }
-.contact-page {
-  min-height: 100vh;
-}
-
-.contact-hero {
+.process {
   padding: 80px;
+  border-top: 1px solid #222;
 }
 
-.contact-hero h1 {
-  font-size: 3rem;
+.process h2 {
+  margin-bottom: 40px;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.process-card {
+  background: #1c1c1c;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.process-card span {
+  color: #d4af37;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.process-card h3 {
+  margin: 15px 0;
+}
+
+.process-card p {
+  color: #bbb;
+}
+.contact-form-section {
+  padding: 80px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 50px;
+  align-items: start;
+}
+
+.contact-info h2 {
+  margin-bottom: 30px;
+  font-size: 2rem;
+}
+
+.info-card {
+  background: #1c1c1c;
+  padding: 20px;
+  border-radius: 12px;
   margin-bottom: 20px;
 }
 
-.contact-hero p {
+.info-card h3 {
+  color: #d4af37;
+  margin-bottom: 10px;
+}
+
+.info-card p {
   color: #bbb;
-  max-width: 700px;
+  margin-bottom: 5px;
 }
-
-.contact-form-section {
-  padding: 80px;
-}
-
 .contact-form {
-  max-width: 700px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 .contact-form input,
 .contact-form select,
 .contact-form textarea {
+  width: 100%;
   padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #333;
   background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 10px;
   color: white;
+  font-size: 1rem;
+}
+
+.contact-form textarea {
+  resize: vertical;
 }
 
 .contact-form button {
-  padding: 15px;
-  border: none;
-  border-radius: 8px;
-  background: white;
+  background: #d4af37;
   color: black;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.contact-form button:hover {
+  opacity: 0.9;
+}
+.contact-hero {
+  padding: 80px 80px 20px;
+}
+.contact-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+.consult-btn {
+  background: #d4af37;
+  color: black !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
 }

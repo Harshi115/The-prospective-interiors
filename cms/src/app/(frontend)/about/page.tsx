@@ -1,5 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
+import Navbar from '@/components/navbar'
+import Footer from '@/components/Footer'
 
 export default async function AboutPage() {
   const payload = await getPayload({ config })
@@ -24,16 +26,7 @@ export default async function AboutPage() {
   return (
     <main className="about-page">
 
-  <nav className="navbar">
-    <div className="logo">The Prospective Interiors</div>
-
-    <div className="nav-links">
-      <a href="/">Home</a>
-      <a href="/projects">Projects</a>
-      <a href="/about">About</a>
-      <a href="/contact">Contact</a>
-    </div>
-  </nav>
+<Navbar />
 
   <section className="about-hero">
         <h1>About Us</h1>
@@ -66,18 +59,7 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
-      <footer className="footer">
-  <h3>The Prospective Interiors</h3>
-
-  <div className="footer-links">
-    <a href="/">Home</a>
-    <a href="/projects">Projects</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-  </div>
-
-  <p>© 2026 The Prospective Interiors</p>
-</footer>
+      <Footer />
     </main>
   )
 }
