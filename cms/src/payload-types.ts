@@ -187,21 +187,8 @@ export interface Project {
   sector?: ('Hospitality' | 'Industrial' | 'Healthcare' | 'Retail' | 'Residential' | 'Commercial' | 'Civic') | null;
   heroImage?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  description?: string | null;
+  area?: string | null;
   featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -428,6 +415,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   heroImage?: T;
   gallery?: T;
   description?: T;
+  area?: T;
   featured?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -54,7 +54,11 @@ export const Projects: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'richText',
+      type: 'textarea',
+    },
+    {
+      name: 'area',
+      type: 'text',
     },
     {
       name: 'featured',
@@ -63,3 +67,4 @@ export const Projects: CollectionConfig = {
     },
   ],
 }
+        

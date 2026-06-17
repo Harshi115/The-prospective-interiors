@@ -15,22 +15,19 @@ const gG=(p:Project)=>{const g=(p.gallery||[]).filter(Boolean);return g.length?g
 function tk(d:boolean){return{ink:d?'#f0ede8':'#0f0e0d',paper:d?'#111010':'#faf9f7',surface:d?'#1c1b1a':'#ffffff',muted:d?'#7a756f':'#6b6560',border:d?'#2e2b28':'#e4e0da',subtle:d?'#161514':'#f4f1ec'}}
 
 function Logo({dark}:{dark:boolean}){
-  const c=dark?'#f0ede8':'#0f0e0d'
   return(
-    <div style={{display:'flex',alignItems:'center',gap:10}}>
-      <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
-        <rect width="42" height="42" rx="7" fill={AC}/>
-        <rect x="7" y="11" width="12" height="2.5" rx="1.2" fill="white"/>
-        <rect x="11.5" y="11" width="2.5" height="15" rx="1.2" fill="white"/>
-        <rect x="23" y="11" width="2.5" height="15" rx="1.2" fill="white"/>
-        <rect x="23" y="11" width="9" height="2.5" rx="1.2" fill="white"/>
-        <rect x="23" y="18" width="9" height="2.5" rx="1.2" fill="white"/>
-        <rect x="29" y="11" width="3" height="10" rx="1.2" fill="white"/>
-      </svg>
-      <div>
-        <div style={{fontSize:'.92rem',fontWeight:700,letterSpacing:'.06em',color:c,fontFamily:"'DM Sans',sans-serif",lineHeight:1.1,textTransform:'uppercase',transition:'color .3s'}}>The Prospective</div>
-        <div style={{fontSize:'7px',letterSpacing:'.26em',color:AC,fontFamily:"'DM Mono',monospace",textTransform:'uppercase'}}>Interiors · Est. 2004</div>
-      </div>
+    <div style={{display:'flex',alignItems:'center'}}>
+      <img
+        src="/api/media/file/logo.png"
+        alt="The Prospective Interiors"
+        style={{
+          height:52,
+          width:'auto',
+          display:'block',
+          filter: dark ? 'invert(1) sepia(1) saturate(0) brightness(2)' : 'none',
+          transition:'filter .3s',
+        }}
+      />
     </div>
   )
 }
