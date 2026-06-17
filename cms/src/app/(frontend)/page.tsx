@@ -45,9 +45,14 @@ const teamData = await payload.find({
       {/* Hero Section */}
       <section className="hero">
   <div className="hero-content">
-    <p className="hero-tagline">
-      Interior Design • Project Management • Execution
-    </p>
+
+  <p className="hero-small">
+    THE PROSPECTIVE INTERIORS
+  </p>
+
+  <p className="hero-tagline">
+    Interior Design • Project Management • Execution
+  </p>
 
     <h1>{page?.heroHeadline}</h1>
 
