@@ -125,23 +125,32 @@ const teamData = await payload.find({
   </div>
 </section>
       {/* Featured Projects */}
-      <section className="projects">
-        <h2>Featured Projects</h2>
-
-        <div className="project-grid">
-          {projectsData.docs.map((project) => (
-  <div key={project.id} className="project-card">
-  <h3>{project.title}</h3>
-
-  {project.sector && <p>Sector: {project.sector}</p>}
-
-  {project.location && <p>Location: {project.location}</p>}
-
-  {project.client && <p>Client: {project.client}</p>}
+     <section className="projects">
+ <div className="section-heading">
+  <p>OUR WORK</p>
+  <h2>Featured Projects</h2>
 </div>
-          ))}
-        </div>
-      </section>
+
+  <div className="project-grid">
+    <div className="project-card">
+      <img src="/projects/building-night.jpg" alt="Project" />
+      <h3>Luxury Apartments</h3>
+      <p>Residential Development</p>
+    </div>
+
+    <div className="project-card">
+      <img src="/projects/living-room.jpg" alt="Project" />
+      <h3>Premium Interiors</h3>
+      <p>Interior Design & Execution</p>
+    </div>
+
+    <div className="project-card">
+      <img src="/projects/villa-section.jpg" alt="Project" />
+      <h3>Luxury Villas</h3>
+      <p>Architecture & Planning</p>
+    </div>
+  </div>
+</section>
 {/* Team Section */}
 <section className="team">
   <h2>Our Team</h2>

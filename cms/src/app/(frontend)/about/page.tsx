@@ -29,9 +29,11 @@ export default async function AboutPage() {
 <Navbar />
 
   <section className="about-hero">
-        <h1>About Us</h1>
-        <p>{page?.philosophyText}</p>
-      </section>
+  <div className="about-overlay">
+    <h1>About Us</h1>
+    <p>{page?.philosophyText}</p>
+  </div>
+</section>
 
       <section className="about-stats">
         <h2>Our Impact</h2>
