@@ -1,7 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { cloudinaryAdapter } from '@payloadcms/plugin-cloud-storage/dist/adapters/cloudinary/index.js'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -38,19 +36,6 @@ export default buildConfig({
     },
   }),
   sharp,
-  plugins: [
-    cloudStoragePlugin({
-      collections: {
-        media: {
-          adapter: cloudinaryAdapter({
-            config: {
-              cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
-              api_key: process.env.CLOUDINARY_API_KEY || '',
-              api_secret: process.env.CLOUDINARY_API_SECRET || '',
-            },
-          }),
-        },
-      },
-    }),
-  ],
+  plugins: [],
 })
+         
