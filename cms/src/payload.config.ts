@@ -1,7 +1,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { cloudinaryAdapter } from '@payloadcms/plugin-cloud-storage/cloudinary'
+import { cloudinaryAdapter } from '@payloadcms/plugin-cloud-storage/dist/adapters/cloudinary/index.js'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
