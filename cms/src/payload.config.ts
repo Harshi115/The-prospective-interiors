@@ -13,6 +13,7 @@ import { TeamMembers } from './collections/TeamMembers'
 import { Stats } from './collections/Stats'
 import { Pages } from './collections/Pages'
 import { Inquiries } from './collections/Inquiries'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -23,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media,Projects,Services,TeamMembers,Stats,Pages,Inquiries],
+  collections: [Users, Media, Projects, Services, TeamMembers, Stats, Pages, Inquiries],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -31,9 +32,10 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
     },
   }),
   sharp,
   plugins: [],
 })
+         

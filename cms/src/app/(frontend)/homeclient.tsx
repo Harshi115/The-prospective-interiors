@@ -7,7 +7,7 @@ interface Stat { label:string;value:string }
 interface HomeData { heroHeadline:string;heroSubtext:string;philosophyText:string;heroImage:string;stats:Stat[];services:any[];team:any[];projects:Project[] }
 
 const AC = '#c8935a'
-const HERO = 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1800&q=95'
+const HERO = 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1800&q=95'
 const FB:Record<string,string> = {
   Hospitality:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=90',
   Healthcare:'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=900&q=90',
@@ -28,22 +28,21 @@ const DS = [
 function tk(d:boolean){return{ink:d?'#f0ede8':'#0f0e0d',paper:d?'#111010':'#faf9f7',surface:d?'#1c1b1a':'#ffffff',muted:d?'#7a756f':'#6b6560',border:d?'#2e2b28':'#e4e0da',subtle:d?'#161514':'#f4f1ec'}}
 
 function Logo({dark,onImg=false}:{dark:boolean;onImg?:boolean}){
-  const c=onImg?'#fff':(dark?'#f0ede8':'#0f0e0d')
   return(
-    <div style={{display:'flex',alignItems:'center',gap:10}}>
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-        <rect width="40" height="40" rx="6" fill={AC}/>
-        <rect x="7" y="11" width="11" height="2.5" rx="1.2" fill="white"/>
-        <rect x="11" y="11" width="2.5" height="14" rx="1.2" fill="white"/>
-        <rect x="22" y="11" width="2.5" height="14" rx="1.2" fill="white"/>
-        <rect x="22" y="11" width="8" height="2.5" rx="1.2" fill="white"/>
-        <rect x="22" y="17.5" width="8" height="2.5" rx="1.2" fill="white"/>
-        <rect x="28" y="11" width="2.5" height="9" rx="1.2" fill="white"/>
-      </svg>
-      <div>
-        <div style={{fontSize:'.9rem',fontWeight:700,letterSpacing:'.06em',color:c,fontFamily:"'DM Sans',sans-serif",lineHeight:1.1,textTransform:'uppercase'}}>The Prospective</div>
-        <div style={{fontSize:'7px',letterSpacing:'.24em',color:AC,fontFamily:"'DM Mono',monospace",textTransform:'uppercase'}}>Interiors · Est. 2004</div>
-      </div>
+    <div style={{display:'flex',alignItems:'center'}}>
+      <img
+        src="/api/media/file/logo.png"
+        alt="The Prospective Interiors"
+        style={{
+          height:56,
+          width:'auto',
+          display:'block',
+          filter: onImg || dark
+            ? 'invert(1) sepia(1) saturate(0) brightness(2)'
+            : 'invert(0)',
+          transition:'filter .3s',
+        }}
+      />
     </div>
   )
 }
@@ -278,3 +277,5 @@ export default function HomeClient({data}:{data:HomeData}){
     </>
   )
 }
+  
+              
