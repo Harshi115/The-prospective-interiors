@@ -1,19 +1,7 @@
 # The Prospective Interiors — Official Website
 
-A fully CMS-powered website for **The Prospective Interiors**, a Pune-based interior design firm established in 2004 and led by Principal Designer Prashant Bhandiya.
+A fully CMS-powered website for The Prospective Interiors, a Pune-based interior design firm established in 2004 and led by Principal Designer Prashant Bhandiya.
 
-Built as part of Engineering Internship Assignment #02.
-
----
-
-## Live Demo
-
-| | URL |
-|---|---|
-| 🌐 Frontend | `https://the-prospective-interiors.vercel.app` |
-| 🔧 Admin CMS | `https://the-prospective-interiors.vercel.app/admin` |
-
----
 
 ## Tech Stack
 
@@ -321,9 +309,9 @@ Add content in this order:
 5. **Projects** → Real client projects + demo projects (14+ total)
 6. **Pages** → Home page content + hero image + SEO fields
 
-> **Logo Note:** After uploading `logo.png` to Media, it will automatically appear on all pages via `/api/media/file/logo.png`. In dark mode, the logo is automatically inverted to white using CSS filter.
 
----
+
+
 
 ## Environment Variables
 
@@ -436,6 +424,6 @@ Or connect GitHub repo directly on vercel.com:
 
 ## Author
 
-Built by **Harshita** as part of Engineering Internship Assignment #02 — June 2026
+Built by Harshita & Kuber as part of Internship Assignment 
 
-**The Prospective Interiors** — Est. 2004 · Pune, Maharashtra
+
