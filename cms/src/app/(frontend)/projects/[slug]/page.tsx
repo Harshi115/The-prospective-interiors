@@ -1,124 +1,83 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
 import { notFound } from 'next/navigation'
 import ProjectDetailClient from './ProjectDetailClient'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
-export async function generateStaticParams() {
-  const payload = await getPayload({ config })
-  const projects = await payload.find({ collection: 'projects', limit: 100 })
-  return projects.docs.map((p: any) => ({ slug: p.slug ?? String(p.id) }))
+const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+
+const getImgUrl = (media: any) => {
+  if (!media) return ''
+  const url = media?.url ?? ''
+  return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const payload = await getPayload({ config })
-  const result = await payload.find({
-    collection: 'projects',
-    where: { slug: { equals: slug } },
-    limit: 1,
-  })
-  const p = result.docs[0] as any
-  if (!p) return { title: 'Project Not Found' }
-  return {
-    title: `${p.title} — The Prospective Interiors`,
-    description: `${p.sector} interior design project in ${p.location} by The Prospective Interiors.`,
-  }
-}
-
-function richToPlain(val: any): string {
-  if (!val) return ''
-
-  // Plain string
-  if (typeof val === 'string') {
-    // Try to parse if it's a JSON string
-    try {
-      const parsed = JSON.parse(val)
-      return richToPlain(parsed)
-    } catch {
-      return val
+  try {
+    const res = await fetch(`${STRAPI}/api/projects?filters[slug][$eq]=${slug}&fields=title,sector,location`, { cache: 'no-store' })
+    const json = await res.json()
+    const p = json?.data?.[0]
+    if (!p) return { title: 'Project Not Found' }
+    return {
+      title: `${p.title} — The Prospective Interiors`,
+      description: `${p.sector} interior design project in ${p.location}.`,
     }
+  } catch {
+    return { title: 'The Prospective Interiors' }
   }
-
-  // Lexical JSON object
-  if (val?.root?.children) {
-    return val.root.children
-      .map((node: any) =>
-        node.children?.map((c: any) => c.text ?? '').join('') ?? ''
-      )
-      .filter(Boolean)
-      .join('\n\n')
-  }
-
-  return ''
 }
 
-function imgUrl(val: any): string {
-  if (typeof val === 'object' && val !== null) return val.url ?? ''
-  if (typeof val === 'string') return val
-  return ''
-}
-
-export default async function ProjectDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const payload = await getPayload({ config })
 
-  const result = await payload.find({
-    collection: 'projects',
-    where: { slug: { equals: slug } },
-    limit: 1,
-  })
+  try {
+    const res = await fetch(
+      `${STRAPI}/api/projects?filters[slug][$eq]=${slug}&populate[heroImage]=true&populate[gallery]=true`,
+      { cache: 'no-store' }
+    )
+    const json = await res.json()
+    const raw = json?.data?.[0]
+    if (!raw) notFound()
 
-  if (!result.docs[0]) notFound()
+    const project = {
+      id:          String(raw.id),
+      title:       raw.title       ?? '',
+      slug:        raw.slug        ?? String(raw.id),
+      client:      raw.client      ?? '',
+      location:    raw.location    ?? '',
+      year:        raw.year        ?? null,
+      sector:      raw.sector      ?? '',
+      area:        raw.area        ?? '',
+      featured:    raw.featured    ?? false,
+      description: raw.description ?? '',
+      heroImage:   getImgUrl(raw.heroImage),
+      gallery: (raw.gallery ?? [])
+        .map((img: any) => {
+          const url = img?.url ?? ''
+          return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+        })
+        .filter(Boolean),
+    }
 
-  const p = result.docs[0] as any
+    // Related projects — same sector
+    const relRes = await fetch(
+      `${STRAPI}/api/projects?filters[sector][$eq]=${raw.sector}&filters[slug][$ne]=${slug}&pagination[limit]=3&populate[heroImage]=true`,
+      { cache: 'no-store' }
+    )
+    const relJson = await relRes.json()
+    const related = (relJson?.data ?? []).map((r: any) => ({
+      id:        String(r.id),
+      title:     r.title    ?? '',
+      slug:      r.slug     ?? String(r.id),
+      location:  r.location ?? '',
+      year:      r.year     ?? null,
+      sector:    r.sector   ?? '',
+      heroImage: getImgUrl(r.heroImage),
+    }))
 
-  const project = {
-    id:          String(p.id),
-    title:       p.title    ?? '',
-    slug:        p.slug     ?? String(p.id),
-    client:      p.client   ?? '',
-    location:    p.location ?? '',
-    year:        p.year     ?? null,
-    sector:      p.sector   ?? '',
-    area:        p.area     ?? '',
-    featured:    p.featured ?? false,
-    description: richToPlain(p.description),
-    heroImage:   imgUrl(p.heroImage),
-    gallery: Array.isArray(p.gallery)
-      ? p.gallery.map((img: any) => imgUrl(img)).filter(Boolean)
-      : [],
+    return <ProjectDetailClient project={project} related={related} />
+  } catch (error) {
+    console.error('Project detail error:', error)
+    notFound()
   }
-
-  const related = await payload.find({
-    collection: 'projects',
-    where: {
-      and: [
-        { sector: { equals:     p.sector } },
-        { slug:   { not_equals: slug     } },
-      ],
-    },
-    limit: 3,
-  })
-
-  const relatedProjects = related.docs.map((r: any) => ({
-    id:        String(r.id),
-    title:     r.title    ?? '',
-    slug:      r.slug     ?? String(r.id),
-    location:  r.location ?? '',
-    year:      r.year     ?? null,
-    sector:    r.sector   ?? '',
-    heroImage: imgUrl(r.heroImage),
-  }))
-
-  return <ProjectDetailClient project={project} related={relatedProjects} />
 }

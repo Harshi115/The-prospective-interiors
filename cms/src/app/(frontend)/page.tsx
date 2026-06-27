@@ -1,55 +1,72 @@
-import { getPayload } from 'payload'
-import config from '@/payload.config'
 import HomeClient from './homeclient'
 
 export const metadata = {
   title: 'The Prospective Interiors — Designing Spaces That Shape The Future',
-  description: 'Pune-based interior design and architecture firm established in 2004. 20+ years of excellence across hospitality, healthcare, residential, retail and commercial sectors.',
+  description: 'Pune-based interior design and architecture firm established in 2004.',
 }
 
-export default async function HomePage() {
-  const payload = await getPayload({ config })
+export const revalidate = 60
 
-  const [pagesData, statsData, servicesData, teamData, projectsData] = await Promise.all([
-    payload.find({ collection: 'pages', limit: 1 }),
-    payload.find({ collection: 'stats', sort: 'order' }),
-    payload.find({ collection: 'services' }),
-    payload.find({ collection: 'team-members', sort: 'order' }),
-    payload.find({
-      collection: 'projects',
-      where: { featured: { equals: true } },
-      limit: 3,
-    }),
+export default async function HomePage() {
+  const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  const TOKEN  = process.env.STRAPI_API_TOKEN || ''
+  const headers = { Authorization: `Bearer ${TOKEN}` }
+
+  const [pagesRes, statsRes, servicesRes, teamRes, projectsRes] = await Promise.all([
+    fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate=heroImage`, { headers, next: { revalidate: 60 } }),
+    fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
+    fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
+    fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
+    fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&pagination[limit]=3&populate=heroImage`, { headers, next: { revalidate: 60 } }),
   ])
 
-  const page = pagesData.docs[0] as any
+  const [pagesJson, statsJson, servicesJson, teamJson, projectsJson] = await Promise.all([
+    pagesRes.json(), statsRes.json(), servicesRes.json(), teamRes.json(), projectsRes.json(),
+  ])
+
+  // Strapi v5 — data directly on object, no .attributes needed
+  const page = pagesJson?.data?.[0] ?? {}
+
+  const getImgUrl = (media: any) => {
+    // Strapi v5 image format
+    const url = media?.url ?? media?.data?.attributes?.url ?? ''
+    return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+  }
 
   const data = {
-    heroHeadline:   page?.heroHeadline   ?? 'Designing Spaces That Shape The Future',
-    heroSubtext:    page?.heroSubtext    ?? '20+ Years of Excellence in Interior Design across Maharashtra and pan-India.',
-    philosophyText: page?.philosophyText ?? 'We believe that every space has a story. Our designs are a dialogue between functionality, aesthetics and the people who inhabit them.',
-    heroImage:
-      typeof page?.heroImage === 'object' && page?.heroImage !== null
-        ? page.heroImage.url
-        : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=90',
-    stats: statsData.docs.map((s: any) => ({
-      label: s.label ?? '', value: s.value ?? '',
+    heroHeadline:   page.heroHeadline   ?? 'Designing Spaces That Shape The Future',
+    heroSubtext:    page.heroSubtext    ?? 'A 20-year legacy of transforming spaces across hospitality, healthcare, retail, residential and industrial sectors.',
+    philosophyText: page.philosophyText ?? 'Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs.',
+    heroImage:      getImgUrl(page.heroImage),
+
+    stats: (statsJson?.data ?? []).map((s: any) => ({
+      label: s.label ?? '',
+      value: s.value ?? s.valur ?? '',
     })),
-    services: servicesData.docs.map((s: any) => ({
-      id: String(s.id), title: s.title ?? '', description: s.description ?? '',
+
+    services: (servicesJson?.data ?? []).map((s: any) => ({
+      id:          String(s.id),
+      title:       s.title       ?? '',
+      description: s.description ?? '',
     })),
-    team: teamData.docs.map((m: any) => ({
-      id: String(m.id), name: m.name ?? '', role: m.role ?? '', bio: m.bio ?? '',
-      photo: typeof m.photo === 'object' && m.photo !== null ? m.photo.url : '',
+
+    team: (teamJson?.data ?? []).map((m: any) => ({
+      id:    String(m.id),
+      name:  m.name  ?? '',
+      role:  m.role  ?? '',
+      bio:   m.bio   ?? '',
+      photo: getImgUrl(m.photo),
     })),
-    projects: projectsData.docs.map((p: any) => ({
-      id: String(p.id), title: p.title ?? '', slug: p.slug ?? String(p.id),
-      location: p.location ?? '', year: p.year ?? null, sector: p.sector ?? '',
-      client: p.client ?? '',
-      heroImage:
-        typeof p.heroImage === 'object' && p.heroImage !== null
-          ? p.heroImage.url
-          : typeof p.heroImage === 'string' ? p.heroImage : '',
+
+    projects: (projectsJson?.data ?? []).map((p: any) => ({
+      id:        String(p.id),
+      title:     p.title    ?? '',
+      slug:      p.slug     ?? String(p.id),
+      location:  p.location ?? '',
+      year:      p.year     ?? null,
+      sector:    p.sector   ?? '',
+      client:    p.client   ?? '',
+      heroImage: getImgUrl(p.heroImage),
     })),
   }
 
