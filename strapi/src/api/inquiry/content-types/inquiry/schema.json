@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inquiries",
+  "info": {
+    "singularName": "inquiry",
+    "pluralName": "inquiries",
+    "displayName": "Inquiry"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "project_type": {
+      "type": "enumeration",
+      "enum": [
+        "Residential,Commercial,Hospitality,Industrial,Healthcare,Other"
+      ]
+    },
+    "message": {
+      "type": "text"
+    },
+    "submittedAt": {
+      "type": "date"
+    }
+  }
+}
