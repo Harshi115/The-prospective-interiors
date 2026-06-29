@@ -1,429 +1,158 @@
 # The Prospective Interiors — Official Website
 
-A fully CMS-powered website for The Prospective Interiors, a Pune-based interior design firm established in 2004 and led by Principal Designer Prashant Bhandiya.
-
-
-## Tech Stack
-
-| Layer | Technology | Why |
-|---|---|---|
-| Frontend | Next.js 15 (App Router) | Server Components, SSG + ISR for project pages |
-| Language | TypeScript (strict) | Type safety across frontend and backend |
-| CMS | Payload CMS 3 | Self-hosted, code-first, deeply integrated with Next.js |
-| Database | PostgreSQL | Payload CMS native adapter |
-| Styling | Inline CSS + DM font family | Full design control without Tailwind overhead |
-| Animations | CSS transitions | Subtle, professional — no Framer Motion dependency |
-| Deployment | Vercel | CI/CD, preview deployments, edge network |
-| Images | Payload media uploads + Unsplash | CMS-managed with fallback placeholders |
-| Validation | Zod | Runtime schema validation on POST /api/inquiries |
+A fully CMS-powered luxury interior design website built with **Next.js 15** + **Strapi v5**.
 
 ---
 
-## Project Structure
+## 🏗 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 15 (App Router, TypeScript) |
+| CMS | Strapi v5 (SQLite) |
+| Styling | Inline styles (no CSS framework) |
+| Fonts | Cormorant Garamond + Inter (Google Fonts) |
+| Deployment | Vercel (Frontend) + Strapi Cloud (CMS) |
+
+---
+
+## 📁 Project Structure
 
 ```
-cms/
-├── src/
-│   ├── app/
-│   │   ├── (frontend)/          # All public-facing pages
-│   │   │   ├── page.tsx         # Home page (server component)
-│   │   │   ├── HomeClient.tsx   # Home interactive UI
-│   │   │   ├── about/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── AboutClient.tsx
-│   │   │   ├── contact/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── ContactClient.tsx
-│   │   │   └── projects/
-│   │   │       ├── page.tsx
-│   │   │       ├── ProjectsClient.tsx
-│   │   │       └── [slug]/
-│   │   │           ├── page.tsx          # SSG + ISR project detail
-│   │   │           └── ProjectDetailClient.tsx
-│   │   └── api/
-│   │       ├── projects/
-│   │       │   ├── route.ts             # GET /api/projects
-│   │       │   └── [slug]/route.ts      # GET /api/projects/:slug
-│   │       ├── services/route.ts        # GET /api/services
-│   │       ├── team/route.ts            # GET /api/team
-│   │       └── inquiries/route.ts       # POST /api/inquiries (Zod validated)
-│   ├── collections/
-│   │   ├── Projects.ts
-│   │   ├── Services.ts
-│   │   ├── TeamMembers.ts
-│   │   ├── Stats.ts
-│   │   ├── Pages.ts
-│   │   ├── Inquiries.ts
-│   │   ├── Media.ts
-│   │   └── Users.ts
-│   └── payload.config.ts
-├── .env.local
-├── package.json
-└── README.md
+The-prospective-interiors/
+├── cms/                          ← Next.js 15 Frontend
+│   ├── src/
+│   │   └── app/
+│   │       └── (frontend)/
+│   │           ├── page.tsx              ← Home page
+│   │           ├── homeclient.tsx        ← Home client component
+│   │           ├── projects/
+│   │           │   ├── page.tsx          ← Projects listing
+│   │           │   ├── ProjectsClient.tsx
+│   │           │   └── [slug]/
+│   │           │       ├── page.tsx      ← Project detail
+│   │           │       └── ProjectDetailClient.tsx
+│   │           ├── about/
+│   │           │   ├── page.tsx
+│   │           │   └── AboutClient.tsx
+│   │           └── contact/
+│   │               ├── page.tsx
+│   │               └── contactclient.tsx
+│   └── .env                      ← Environment variables
+└── strapi/                       ← Strapi v5 CMS
+    ├── src/
+    │   └── api/                  ← Collection types
+    ├── config/
+    └── database/
 ```
 
 ---
 
-## CMS Collections (Data Models)
-
-### Project
-| Field | Type | Notes |
-|---|---|---|
-| title | text | Required |
-| slug | text | URL-safe, unique |
-| client | text | Client name |
-| location | text | City, State |
-| year | number | Completion year |
-| sector | select | Hospitality / Industrial / Healthcare / Retail / Residential / Commercial / Civic |
-| heroImage | upload | Main project image |
-| gallery | upload (hasMany) | Additional project images |
-| description | textarea | Project description |
-| area | text | Square footage / area |
-| featured | checkbox | Show on homepage |
-
-### Service
-| Field | Type | Notes |
-|---|---|---|
-| title | text | Service name |
-| description | text | Short description |
-| order | number | Display order |
-
-### TeamMember
-| Field | Type | Notes |
-|---|---|---|
-| name | text | Full name |
-| role | text | Job title |
-| photo | upload | Headshot |
-| bio | text | Short biography |
-| order | number | Display order |
-
-### Stat
-| Field | Type | Notes |
-|---|---|---|
-| label | text | e.g. "Years of Excellence" |
-| value | text | e.g. "20+" |
-| order | number | Display order |
-
-### Page (Homepage)
-| Field | Type | Notes |
-|---|---|---|
-| heroHeadline | text | Main hero heading |
-| heroSubtext | text | Hero subheading |
-| heroImage | upload | Hero background image |
-| philosophyText | text | Philosophy quote |
-| seoTitle | text | SEO page title |
-| seoDescription | text | SEO meta description |
-
-### Inquiry
-| Field | Type | Notes |
-|---|---|---|
-| name | text | Submitter name |
-| email | text | Zod email validated |
-| phone | text | Optional |
-| projectType | select | Residential / Commercial / Hospitality / Industrial / Healthcare / Retail / Educational / Other |
-| message | text | Project description |
-| submittedAt | date | Auto-set on submit |
-| status | select | New / Contacted / Closed |
-
----
-
-## API Endpoints
-
-### GET /api/projects
-Returns all published projects.
-
-```bash
-curl https://the-prospective-interiors.vercel.app/api/projects
-```
-
-**Response**
-```json
-{
-  "docs": [
-    {
-      "id": "1",
-      "title": "The Ritz-Carlton Residences",
-      "slug": "the-ritz-carlton-residences",
-      "client": "Ritz Carlton Pvt Ltd",
-      "location": "Pune, Maharashtra",
-      "year": 2025,
-      "sector": "Hospitality",
-      "heroImage": "/api/media/file/image.webp",
-      "gallery": [],
-      "description": "...",
-      "featured": true
-    }
-  ],
-  "totalDocs": 14
-}
-```
-
----
-
-### GET /api/projects/:slug
-Returns a single project by slug.
-
-```bash
-curl https://the-prospective-interiors.vercel.app/api/projects/the-ritz-carlton-residences
-```
-
-**Response**
-```json
-{
-  "id": "1",
-  "title": "The Ritz-Carlton Residences",
-  "slug": "the-ritz-carlton-residences",
-  "sector": "Hospitality",
-  "description": "A landmark luxury residential project...",
-  "gallery": ["/api/media/file/img1.webp", "/api/media/file/img2.webp"]
-}
-```
-
-**404 Response**
-```json
-{
-  "error": "Project not found",
-  "status": 404
-}
-```
-
----
-
-### GET /api/services
-Returns all services ordered by `order` field.
-
-```bash
-curl https://the-prospective-interiors.vercel.app/api/services
-```
-
-**Response**
-```json
-{
-  "docs": [
-    { "id": "1", "title": "Conceptualization & Design", "description": "...", "order": 1 },
-    { "id": "2", "title": "Project Management", "description": "...", "order": 2 }
-  ]
-}
-```
-
----
-
-### GET /api/team
-Returns all team members ordered by `order` field.
-
-```bash
-curl https://the-prospective-interiors.vercel.app/api/team
-```
-
-**Response**
-```json
-{
-  "docs": [
-    { "id": "1", "name": "Prashant Bhandiya", "role": "Principal Designer", "bio": "...", "photo": "..." }
-  ]
-}
-```
-
----
-
-### POST /api/inquiries
-Submits a project inquiry. Validated with Zod.
-
-```bash
-curl -X POST https://the-prospective-interiors.vercel.app/api/inquiries \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Rahul Sharma",
-    "email": "rahul@example.com",
-    "phone": "+91 98765 43210",
-    "projectType": "Residential",
-    "message": "I want to redesign my 3BHK apartment in Baner, Pune. Budget around 30 lakhs."
-  }'
-```
-
-**Success Response (201)**
-```json
-{
-  "success": true,
-  "message": "Inquiry submitted successfully",
-  "id": "abc123"
-}
-```
-
-**Validation Error Response (400)**
-```json
-{
-  "success": false,
-  "error": "Validation failed",
-  "details": [
-    { "field": "email", "message": "Invalid email address" },
-    { "field": "name", "message": "Name is required" }
-  ]
-}
-```
-
----
-
-## Local Setup
+## 🚀 Local Development
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL database (local or Neon/Supabase)
+- npm
 
-### 1 — Clone the repo
+### Step 1 — Clone the repo
 ```bash
-git clone https://github.com/your-username/the-prospective-interiors.git
-cd the-prospective-interiors/cms
+git clone https://github.com/Harshi115/The-prospective-interiors.git
+cd The-prospective-interiors
 ```
 
-### 2 — Install dependencies
+### Step 2 — Start Strapi CMS
 ```bash
+cd strapi
 npm install
+npm run develop
 ```
+Strapi runs at: `http://localhost:1337`
+Admin panel: `http://localhost:1337/admin`
 
-### 3 — Create `.env.local`
+### Step 3 — Start Next.js Frontend
 ```bash
-cp .env.example .env.local
-```
-
-Fill in the values (see Environment Variables below)
-
-### 4 — Run development server
-```bash
+cd ../cms
+npm install
 npm run dev
 ```
+Frontend runs at: `http://localhost:3000`
 
-Open:
-- Frontend → `http://localhost:3000`
-- CMS Admin → `http://localhost:3000/admin`
-
-### 5 — Create first admin user
-Go to `http://localhost:3000/admin` and create your admin account.
-
-### 6 — Seed the CMS
-Add content in this order:
-1. **Media** → Upload `logo.png` (firm logo — used across all pages)
-2. **Stats** → 4 entries (20+ Years, 200+ Projects, 8 Sectors, 50+ Team)
-3. **Services** → 12 entries (see list in CMS section above)
-4. **Team Members** → Add Prashant Bhandiya
-5. **Projects** → Real client projects + demo projects (14+ total)
-6. **Pages** → Home page content + hero image + SEO fields
-
-
-
-
-
-## Environment Variables
-
+### Step 4 — Environment Variables
+Create `cms/.env`:
 ```env
-# Database
-DATABASE_URI=postgresql://user:password@host:5432/dbname
-
-# Payload CMS
-PAYLOAD_SECRET=your-super-secret-key-min-32-chars
-
-# Next.js
-NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-```
-
-### For Production (Vercel)
-Add these in Vercel Dashboard → Settings → Environment Variables:
-
-```env
-DATABASE_URI=postgresql://...neon.tech/dbname
-PAYLOAD_SECRET=your-production-secret-key
-NEXT_PUBLIC_SERVER_URL=https://your-vercel-url.vercel.app
+NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+STRAPI_API_TOKEN=
 ```
 
 ---
 
-## Deployment
+## 🗄 Strapi CMS Collections
 
-### Deploy to Vercel
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-
-# Set environment variables
-vercel env add DATABASE_URI
-vercel env add PAYLOAD_SECRET
-vercel env add NEXT_PUBLIC_SERVER_URL
-```
-
-Or connect GitHub repo directly on vercel.com:
-1. Import repository
-2. Root directory: `cms`
-3. Add environment variables
-4. Deploy
+| Collection | Fields |
+|-----------|--------|
+| **Project** | title, slug, client, location, year, sector, heroImage, gallery, description, area, featured |
+| **Service** | title, description, icon, order |
+| **Stat** | label, value, order |
+| **Team Member** | name, role, photo, bio, order |
+| **Page** | heroHeadline, heroSubtext, heroImage, philosophyText, seoTitle, seoDescription |
+| **Inquiry** | name, email, phone, project_type, message, submittedAt, status |
 
 ---
 
-## Pages Overview
+## 🌐 Deployment
 
-| Route | Page | Description |
-|---|---|---|
-| `/` | Home | Hero, stats, featured projects, philosophy |
-| `/projects` | Projects | Filter grid, search, compare |
-| `/projects/[slug]` | Project Detail | SSG + ISR, gallery, description |
-| `/about` | About | Firm story, values, team, services, sectors |
-| `/contact` | Contact | 3-step inquiry form |
-| `/admin` | CMS Admin | Payload CMS dashboard |
+| Service | URL |
+|---------|-----|
+| Frontend (Vercel) | https://the-prospective-interiors.vercel.app |
+| CMS (Strapi Cloud) | https://lovely-passion-679d98f6f1.strapiapp.com |
 
----
+### Deploy Frontend (Vercel)
+1. Connect GitHub repo to Vercel
+2. Root Directory: `cms`
+3. Environment Variables:
+   ```
+   NEXT_PUBLIC_STRAPI_URL=https://lovely-passion-679d98f6f1.strapiapp.com
+   ```
 
-## Features
-
-- ✅ Full-bleed hero with CMS-managed content
-- ✅ Filterable projects grid (8 sectors)
-- ✅ Project detail pages with SSG + ISR
-- ✅ Dark / Light theme toggle (localStorage)
-- ✅ Compare 2 projects side by side
-- ✅ 3-step contact form with Zod validation
-- ✅ 12 services from CMS
-- ✅ Team members from CMS
-- ✅ Stats counter animation
-- ✅ Image gallery with lightbox
-- ✅ SEO metadata per page
-- ✅ Responsive design (mobile/tablet/desktop)
-- ✅ REST API endpoints
+### Deploy CMS (Strapi Cloud)
+1. Connect `tpi-strapi` GitHub repo to Strapi Cloud
+2. Region: Asia (Southeast)
+3. Node version: 18
 
 ---
 
-## Known Limitations
+## 🎨 Design System
 
-- Tailwind CSS not used — inline CSS used instead for full design control
-- Framer Motion not used — CSS transitions used (acceptable per assignment)
-- Hono backend not used — Next.js API routes used instead (simpler for monorepo setup)
-- Image optimization uses Payload's built-in handler, not Sharp separately
-
----
-
-## Assignment Requirements Status
-
-| Req | Description | Status |
-|---|---|---|
-| R1 | Full-Bleed Hero | ✅ Done |
-| R2 | Filterable Projects Grid | ✅ Done |
-| R3 | Project Detail (SSG + ISR) | ✅ Done |
-| R4 | All Content via CMS | ✅ Done |
-| R5 | Services Section (12) | ✅ Done |
-| R6 | Dark/Light Theme | ✅ Done |
-| R7 | Contact Form | ✅ Done |
-| R8 | REST API | ✅ Done |
-| R9 | Responsive Design | ✅ Done |
-| R10 | Seed Real Projects (14) | ✅ Done |
-| R11 | Compare Projects | ✅ Done |
-| R12 | Animations | ✅ Done |
-| R13 | SEO Metadata | ✅ Done |
+| Token | Value |
+|-------|-------|
+| Gold | `#b89a6e` |
+| Cream | `#f7f4ef` |
+| Dark | `#1a1814` |
+| Heading Font | Cormorant Garamond |
+| Body Font | Inter |
 
 ---
 
-## Author
+## ✨ Features
 
-Built by Harshita & Kuber as part of Internship Assignment 
+- ✅ **Dark/Light Mode** — persisted in localStorage
+- ✅ **CMS-powered** — all content from Strapi
+- ✅ **Project Gallery** — lightbox with keyboard navigation
+- ✅ **Project Compare** — side-by-side comparison
+- ✅ **Contact Form** — saves to Strapi Inquiry collection
+- ✅ **Responsive** — mobile, tablet, desktop
+- ✅ **SEO** — dynamic metadata from CMS
+- ✅ **Sector Filters** — filter projects by sector
+- ✅ **Related Projects** — same sector suggestions
 
+---
 
+## 👩‍💻 Developer
+
+Harshita & Kuber
+
+---
+
+## 📄 License
+
+Private project — All rights reserved © 2026 The Prospective Interiors
