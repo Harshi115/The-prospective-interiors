@@ -1,11 +1,10 @@
 import { z } from 'zod'
 
 const InquirySchema = z.object({
-  name:        z.string().min(2).max(100).trim(),
-  email:       z.string().email().trim(),
-  phone:       z.string().optional().or(z.literal('')),
-  projectType: z.string().optional(),
-  message:     z.string().min(10).max(2000).trim(),
+  name:    z.string().min(2).max(100).trim(),
+  email:   z.string().email().trim(),
+  phone:   z.string().optional().or(z.literal('')),
+  message: z.string().min(10).max(2000).trim(),
 })
 
 export async function POST(req: Request) {
@@ -27,12 +26,10 @@ export async function POST(req: Request) {
       headers,
       body: JSON.stringify({
         data: {
-          name:        result.data.name,
-          email:       result.data.email,
-          phone:       result.data.phone || '',
-          message:     result.data.message,
-          submittedAt: new Date().toISOString(),
-          status:      'New',
+          name:    result.data.name,
+          email:   result.data.email,
+          phone:   result.data.phone || '',
+          message: result.data.message,
         }
       }),
     })
