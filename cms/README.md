@@ -239,11 +239,20 @@ STRAPI_API_TOKEN=
 
 ## 👩‍💻 Developer
 
+<<<<<<< HEAD
 **Harshita** — Junior Software Developer  
 📍 Triaksha Automations, Jaipur  
 🏛️ Internship project for **The Prospective Interiors**, Pune — Est. 2004
+=======
+**Harshita** & Kuber
+
+>>>>>>> 4786ee3989c05e232b65c9c064fe6e3c546cd72d
 
 ---
 
 ## 📄 License
+<<<<<<< HEAD
 Private project — © 2026 The Prospective Interiors. All rights reserved.
+=======
+Private project — © 2026 The Prospective Interiors. All rights reserved.
+>>>>>>> 4786ee3989c05e232b65c9c064fe6e3c546cd72d
