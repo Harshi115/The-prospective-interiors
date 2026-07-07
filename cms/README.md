@@ -239,9 +239,8 @@ STRAPI_API_TOKEN=
 
 ## 👩‍💻 Developer
 
-**Harshita** — Junior Software Developer  
-📍 Triaksha Automations, Jaipur  
-🏛️ Internship project for **The Prospective Interiors**, Pune — Est. 2004
+**Harshita** & Kuber
+
 
 ---
 
