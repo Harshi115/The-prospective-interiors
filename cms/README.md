@@ -1,67 +1,249 @@
-# Payload Blank Template
+# 🏛️ The Prospective Interiors — Official Website
 
-This template comes configured with the bare minimum to get started on anything you need.
+> A fully CMS-powered luxury interior design website built with **Next.js 15** + **Strapi v5**
 
-## Quick start
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![Strapi](https://img.shields.io/badge/Strapi-v5-2F2D5B?style=flat-square&logo=strapi)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript)
+![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel)
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+---
 
-## Quick Start - local setup
+## 🌐 Live Links
 
-To spin up this template locally, follow these steps:
+| | Link |
+|--|------|
+| 🚀 **Live Website** | https://the-prospective-interiors.vercel.app |
+| ⚙️ **CMS Admin** | https://lovely-passion-679d98f6f1.strapiapp.com/admin |
+| 📦 **GitHub Repo** | https://github.com/Harshi115/The-prospective-interiors |
 
-### Clone
+---
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+## ✨ Features
 
-### Development
+- 🌙 **Dark / Light Mode** — saved in localStorage
+- 🗂️ **Sector Filters** — filter projects by 8 sectors
+- 🖼️ **Project Gallery** — lightbox with keyboard navigation
+- ⚖️ **Project Compare** — compare 2 projects side by side
+- 📬 **Contact Form** — saves to Strapi CMS
+- 📱 **Fully Responsive** — mobile, tablet, desktop
+- 🔍 **SEO Ready** — dynamic metadata from CMS
+- ⚡ **CMS Powered** — all content managed via Strapi, no hardcoding
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+---
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## 🏗️ Tech Stack
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+| Layer | Technology | Why? |
+|-------|-----------|------|
+| 🎨 Frontend | Next.js 15 (App Router) | Server components, fast, Vercel integration |
+| 📝 CMS | Strapi v5 | Headless CMS, REST API, easy content management |
+| 🔷 Language | TypeScript | Type safety, better developer experience |
+| 🗄️ Database | SQLite | Simple setup, no separate DB server needed |
+| 🚀 Hosting | Vercel + Strapi Cloud | Best platforms for Next.js and Strapi |
 
-#### Docker (Optional)
+---
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+## 📁 Project Structure
 
-To do so, follow these steps:
+```
+The-prospective-interiors/
+│
+├── 📂 cms/                          ← Next.js 15 Frontend
+│   ├── src/
+│   │   └── app/
+│   │       ├── api/inquiries/       ← Contact form API route
+│   │       └── (frontend)/
+│   │           ├── page.tsx         ← Home page
+│   │           ├── homeclient.tsx
+│   │           ├── projects/        ← Projects listing + detail
+│   │           ├── about/           ← About page
+│   │           └── contact/         ← Contact page
+│   └── public/
+│
+└── 📂 strapi/                       ← Strapi v5 CMS
+    └── src/api/
+        ├── project/
+        ├── service/
+        ├── stat/
+        ├── page/
+        ├── inquiry/
+        └── team-member/
+```
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+---
 
-## How it works
+## 🚀 Local Setup
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+### Prerequisites
+- Node.js 18+
+- npm
+- Git
 
-### Collections
+### 1️⃣ Clone the repo
+```bash
+git clone https://github.com/Harshi115/The-prospective-interiors.git
+cd The-prospective-interiors
+```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+### 2️⃣ Start Strapi CMS
+```bash
+cd strapi
+npm install
+npm run develop
+```
+> Strapi → `http://localhost:1337` | Admin → `http://localhost:1337/admin`
 
-- #### Users (Authentication)
+### 3️⃣ Start Next.js Frontend
+```bash
+cd ../cms
+npm install
+npm run dev
+```
+> Frontend → `http://localhost:3000`
 
-  Users are auth-enabled collections that have access to the admin panel.
+### 4️⃣ Environment Variables
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+Create `cms/.env`:
+```env
+NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+STRAPI_API_TOKEN=
+```
 
-- #### Media
+### 5️⃣ Strapi Permissions
+1. Go to `http://localhost:1337/admin`
+2. **Settings** → **Users & Permissions** → **Roles** → **Public**
+3. Enable `find` + `findOne` for: Project, Service, Stat, Page, Team Member
+4. Enable `create` for: Inquiry
+5. **Save** ✅
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+---
 
-### Docker
+## 🔑 Environment Variables
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+### Frontend (`cms/.env`)
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_STRAPI_URL` | Strapi CMS URL | `http://localhost:1337` |
+| `STRAPI_API_TOKEN` | Strapi API token (optional) | `abc123...` |
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+### Strapi (`strapi/.env`)
 
-## Questions
+| Variable | Description |
+|----------|-------------|
+| `HOST` | Server host (`0.0.0.0`) |
+| `PORT` | Server port (`1337`) |
+| `APP_KEYS` | App keys (`key1,key2,key3,key4`) |
+| `API_TOKEN_SALT` | Random string |
+| `ADMIN_JWT_SECRET` | Random string |
+| `JWT_SECRET` | Random string |
+| `NODE_ENV` | `development` or `production` |
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+---
+
+## 🔌 API Reference
+
+### Strapi APIs
+> Base URL: `https://lovely-passion-679d98f6f1.strapiapp.com`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/projects?populate=heroImage,gallery` | All projects |
+| `GET` | `/api/projects?filters[featured][$eq]=true` | Featured projects |
+| `GET` | `/api/projects?filters[slug][$eq]={slug}` | Single project |
+| `GET` | `/api/projects?filters[sector][$eq]={sector}` | By sector |
+| `GET` | `/api/stats?sort=order:asc` | All stats |
+| `GET` | `/api/services?sort=order:asc` | All services |
+| `GET` | `/api/pages?populate=heroImage` | Page content |
+| `POST` | `/api/inquiries` | Submit inquiry |
+
+### Next.js API Routes
+> Base URL: `https://the-prospective-interiors.vercel.app`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/inquiries` | Submit contact form |
+
+**📬 POST /api/inquiries — Sample payload:**
+```json
+{
+  "name": "Rahul Sharma",
+  "email": "rahul@gmail.com",
+  "phone": "9876543210",
+  "message": "I want to redesign my office in Pune with modern sustainable design."
+}
+```
+
+**✅ Response:**
+```json
+{
+  "success": true,
+  "id": "123"
+}
+```
+
+---
+
+## 🗄️ CMS Collections
+
+| Collection | Key Fields |
+|-----------|-----------|
+| 📁 **Project** | title, slug, client, location, year, sector, heroImage, gallery, description, area, featured |
+| 🛠️ **Service** | title, description, order |
+| 📊 **Stat** | label, value, order |
+| 👤 **Team Member** | name, role, photo, bio, order |
+| 📄 **Page** | heroHeadline, heroSubtext, heroImage, philosophyText, seoTitle, seoDescription |
+| 📬 **Inquiry** | name, email, phone, message |
+
+---
+
+## 🎨 Design System
+
+| Token | Value |
+|-------|-------|
+| 🟡 Gold | `#b89a6e` |
+| 🟤 Cream | `#f7f4ef` |
+| ⚫ Dark | `#1a1814` |
+| 🔤 Heading Font | Cormorant Garamond |
+| 🔤 Body Font | Inter |
+
+---
+
+## 🌍 Deployment Guide
+
+### Frontend → Vercel
+1. Connect GitHub repo
+2. **Root Directory:** `cms`
+3. Add env variable: `NEXT_PUBLIC_STRAPI_URL`
+4. Deploy! 🚀
+
+### CMS → Strapi Cloud
+1. Create separate repo for `strapi` folder
+2. Connect to Strapi Cloud
+3. Region: Asia (Southeast) · Node: 18
+4. Add all env variables
+5. Deploy! 🚀
+
+---
+
+## ⚠️ Known Limitations
+
+- 🗄️ **SQLite** — data may reset on Strapi Cloud restarts. PostgreSQL recommended for production
+- 🖼️ **Base64 Images** — some fallback images embedded in code. Should use CDN in production
+- 🔒 **No Auth** — CMS is public read. API token recommended for production
+- 💅 **Inline Styles** — used for rapid development. CSS modules/Tailwind better for scale
+- 🌿 **Single Branch** — developed on main. Feature branches recommended for team projects
+
+---
+
+## 👩‍💻 Developer
+
+**Harshita** — Junior Software Developer  
+📍 Triaksha Automations, Jaipur  
+🏛️ Internship project for **The Prospective Interiors**, Pune — Est. 2004
+
+---
+
+## 📄 License
+Private project — © 2026 The Prospective Interiors. All rights reserved.
