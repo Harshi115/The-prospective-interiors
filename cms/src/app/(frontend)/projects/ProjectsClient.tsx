@@ -5,8 +5,7 @@ import Link from 'next/link'
 const GOLD = '#b89a6e'
 const CREAM = '#f7f4ef'
 const DARK = '#1a1814'
-const STRAPI = 'http://localhost:1337'
-
+const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 interface Project { id:string;title:string;slug:string;client:string;location:string;year:number|null;sector:string;featured:boolean;description:string;heroImage:string;gallery:string[];area:string }
 
 const SECTORS = ['All','Hospitality','Healthcare','Retail','Residential','Industrial','Commercial','Civic','Educational']
