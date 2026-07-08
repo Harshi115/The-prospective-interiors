@@ -10,17 +10,12 @@ export const dynamic = 'force-dynamic'
 export default async function AboutPage() {
   const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
-  const defaultData = {
-    services: [],
-    team: [],
-    stats: [],
-  }
-
   try {
-    const [servicesRes, teamRes, statsRes] = await Promise.all([
+    const [servicesRes, teamRes, statsRes, valuesRes] = await Promise.all([
       fetch(`${STRAPI}/api/services?sort=order:asc`, { cache: 'no-store' }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { cache: 'no-store' }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { cache: 'no-store' }),
+      fetch(`${STRAPI}/api/values?sort=order:asc`, { cache: 'no-store' }),
     ])
 
     const getImgUrl = (media: any) => {
@@ -32,6 +27,7 @@ export default async function AboutPage() {
     const servicesJson = servicesRes.ok ? await servicesRes.json() : { data: [] }
     const teamJson = teamRes.ok ? await teamRes.json() : { data: [] }
     const statsJson = statsRes.ok ? await statsRes.json() : { data: [] }
+    const valuesJson = valuesRes.ok ? await valuesRes.json() : { data: [] }
 
     const services = (servicesJson?.data ?? []).map((s: any) => ({
       id: String(s.id),
@@ -52,9 +48,16 @@ export default async function AboutPage() {
       value: s.value ?? '',
     }))
 
-    return <AboutClient services={services} team={team} stats={stats} />
+    const values = (valuesJson?.data ?? []).map((v: any) => ({
+      id: String(v.id),
+      title: v.title ?? '',
+      description: v.description ?? '',
+      order: v.order ?? 0,
+    }))
+
+    return <AboutClient services={services} team={team} stats={stats} values={values} />
   } catch (error) {
     console.error('About page error:', error)
-    return <AboutClient services={defaultData.services} team={defaultData.team} stats={defaultData.stats} />
+    return <AboutClient services={[]} team={[]} stats={[]} values={[]} />
   }
 }
