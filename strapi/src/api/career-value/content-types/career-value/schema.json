@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "career_values",
+  "info": {
+    "singularName": "career-value",
+    "pluralName": "career-values",
+    "displayName": "Career Value"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "icon": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer"
+    }
+  }
+}
