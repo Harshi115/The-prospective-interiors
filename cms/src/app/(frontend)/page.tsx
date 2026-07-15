@@ -26,7 +26,9 @@ export default async function HomePage() {
 
   try {
     const [pagesRes, statsRes, servicesRes, teamRes, projectsRes] = await Promise.all([
-      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImage]=true&populate[heroImages]=true`, { headers, next: { revalidate: 60 } }),
+      // Only "heroImages" (plural) exists on Page now — the old singular
+      // "heroImage" field was replaced, so we don't populate it anymore.
+      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImages]=true`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
@@ -39,6 +41,11 @@ export default async function HomePage() {
     const teamJson     = teamRes.ok     ? await teamRes.json()     : { data: [] }
     const projectsJson = projectsRes.ok ? await projectsRes.json() : { data: [] }
 
+    if (!pagesRes.ok) {
+      const errText = await pagesRes.text().catch(() => '')
+      console.error('Pages API error:', pagesRes.status, errText)
+    }
+
     // Strapi v5 — data directly on object, no .attributes needed
     const page = pagesJson?.data?.[0] ?? {}
 
@@ -48,20 +55,18 @@ export default async function HomePage() {
       return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
     }
 
-    // Dedicated "heroImages" field (Multiple media) — the real slideshow source.
+    // "heroImages" (Multiple media) — the slideshow source. Normalize defensively
+    // since Strapi can return either a plain array or a { data: [...] } wrapper.
     const rawHeroImages = Array.isArray(page.heroImages)
       ? page.heroImages
       : (page.heroImages?.data ?? [])
     const heroImages = rawHeroImages.map((img: any) => getImgUrl(img)).filter(Boolean)
 
-    // Original single "heroImage" field — used as a fallback if heroImages is empty.
-    const heroImageSingle = getImgUrl(page.heroImage)
-
     const data = {
       heroHeadline:   page.heroHeadline   ?? FALLBACK_DATA.heroHeadline,
       heroSubtext:    page.heroSubtext    ?? FALLBACK_DATA.heroSubtext,
       philosophyText: page.philosophyText ?? FALLBACK_DATA.philosophyText,
-      heroImage:      heroImageSingle,
+      heroImage:      heroImages[0] ?? '',
       heroImages,
 
       stats: (statsJson?.data ?? []).map((s: any) => ({
