@@ -29,6 +29,10 @@ export default async function AboutPage() {
     const statsJson = statsRes.ok ? await statsRes.json() : { data: [] }
     const valuesJson = valuesRes.ok ? await valuesRes.json() : { data: [] }
 
+    // Debug logging — check your terminal after loading /about. Remove once confirmed working.
+    console.log('VALUES API status:', valuesRes.status, valuesRes.ok)
+    console.log('VALUES raw response:', JSON.stringify(valuesJson))
+
     const services = (servicesJson?.data ?? []).map((s: any) => ({
       id: String(s.id),
       title: s.title ?? '',
@@ -54,6 +58,8 @@ export default async function AboutPage() {
       description: v.description ?? '',
       order: v.order ?? 0,
     }))
+
+    console.log('VALUES mapped for component:', values)
 
     return <AboutClient services={services} team={team} stats={stats} values={values} />
   } catch (error) {

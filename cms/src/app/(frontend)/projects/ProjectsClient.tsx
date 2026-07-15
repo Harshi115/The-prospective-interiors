@@ -7,7 +7,7 @@ import Link from 'next/link'
 const GOLD = '#b89a6e'
 const CREAM = '#f7f4ef'
 const DARK = '#1a1814'
-const STRAPI = 'http://localhost:1337'
+const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
 interface Project { id:string;title:string;slug:string;client:string;location:string;year:number|null;sector:string;featured:boolean;description:string;heroImage:string;gallery:string[];area:string }
 
@@ -46,11 +46,6 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
   const [mounted, setMounted] = useState(false)
   const [sector, setSector] = useState('All')
   const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<Project | null>(null)
-  const [imgIdx, setImgIdx] = useState(0)
-  const [compareList, setCompareList] = useState<Project[]>([])
-  const [showCompare, setShowCompare] = useState(false)
-  const [compareMode, setCompareMode] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const setDark = (v: boolean) => { setDarkSt(v); try { localStorage.setItem('tpi-theme', v ? 'dark' : 'light') } catch {} }
@@ -93,37 +88,6 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
   const filtered = useMemo(() => sector === 'All' ? projects : projects.filter(p => p.sector === sector), [projects, sector])
   const paginated = useMemo(() => filtered.slice(0, page * PER), [filtered, page])
   const hasMore = paginated.length < filtered.length
-  const allImgs = (p: Project) => [p.heroImage, ...(p.gallery || [])].filter(Boolean)
-
-  useEffect(() => {
-    if (!selected) return
-    setImgIdx(0)
-    const fn = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelected(null)
-      if (e.key === 'ArrowRight') setImgIdx(i => Math.min(i + 1, allImgs(selected).length - 1))
-      if (e.key === 'ArrowLeft') setImgIdx(i => Math.max(i - 1, 0))
-    }
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', fn)
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', fn) }
-  }, [selected?.id])
-
-  useEffect(() => {
-    if (!showCompare) return
-    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowCompare(false) }
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', fn)
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', fn) }
-  }, [showCompare])
-
-  const toggleCompare = (p: Project) => {
-    setCompareList(prev => {
-      if (prev.find(x => x.id === p.id)) return prev.filter(x => x.id !== p.id)
-      if (prev.length >= 2) return [prev[1], p]
-      return [...prev, p]
-    })
-  }
-  const inCompare = (p: Project) => compareList.some(x => x.id === p.id)
 
   if (!mounted) return null
 
@@ -145,6 +109,8 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
         a{text-decoration:none;color:inherit}
         ::selection{background:${GOLD}40}
         @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+        @keyframes iconSpin{from{opacity:0;transform:rotate(-90deg) scale(.5)}to{opacity:1;transform:rotate(0) scale(1)}}
+        .theme-btn:hover{transform:scale(1.08);border-color:${GOLD}!important}
         @keyframes spin{to{transform:rotate(360deg)}}
         .nav-a{font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .25s;text-decoration:none}.nav-a:hover{color:${GOLD}!important}
         .tog{width:44px;height:24px;border-radius:12px;cursor:pointer;position:relative;display:flex;align-items:center;padding:3px;transition:background .3s;border:1.5px solid;flex-shrink:0}
@@ -157,10 +123,8 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
         .proj-img{overflow:hidden;position:relative}
         .proj-img img{transition:transform .8s ease;width:100%;height:100%;object-fit:cover;display:block}
         .proj-card:hover .proj-img img{transform:scale(1.06)}
-        .cmp-chk{position:absolute;top:12px;right:12px;z-index:10;width:30px;height:30px;border-radius:15px;background:rgba(26,24,20,.65);border:1.5px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s;backdrop-filter:blur(4px)}
-        .cmp-chk.on{background:${GOLD};border-color:${GOLD}}
-        .lb-arr{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);width:48px;height:48px;border-radius:24px;cursor:pointer;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
-        .lb-arr:hover{background:rgba(255,255,255,.2)}
+        .proj-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,12,10,.75) 0%,transparent 55%);opacity:0;transition:opacity .4s}
+        .proj-card:hover .proj-overlay{opacity:1}
         .btn-gold{display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;background:${GOLD};color:#fff;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:opacity .25s,transform .22s;text-decoration:none}.btn-gold:hover{opacity:.88;transform:translateY(-2px)}
         .ft-link{font-size:13px;color:inherit;opacity:.5;transition:color .2s,opacity .2s;text-decoration:none}.ft-link:hover{opacity:1;color:${GOLD}}
         @media(max-width:900px){.pgrid{grid-template-columns:1fr 1fr!important}.ft-g{grid-template-columns:1fr 1fr!important}}
@@ -173,11 +137,18 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
         <nav style={{ position: 'sticky', top: 0, zIndex: 200, height: 68, display: 'flex', alignItems: 'center', padding: '0 56px', gap: 36, background: dark ? 'rgba(17,16,9,.97)' : 'rgba(247,244,239,.97)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${t.border}` }}>
           <Link href="/"><Logo onDark /></Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
-            {([['/', 'Home'],['/projects','Projects'],['/about','About'],['/contact','Contact']] as [string,string][]).map(([href,label]) => (
+            {([['/', 'Home'],['/projects','Projects'],['/about','About'],['/careers','Careers'],['/contact','Contact']] as [string,string][]).map(([href,label]) => (
               <Link key={href} href={href} className="nav-a" style={{ color: href === '/projects' ? GOLD : t.muted }}>{label}</Link>
             ))}
-            <button className="tog" onClick={() => setDark(!dark)} style={{ background: dark ? GOLD : '#ddd5c5', borderColor: dark ? GOLD : '#ccc4b4' }} aria-label="Toggle theme">
-              <div className="tok-k" style={{ background: dark ? DARK : '#fff', transform: dark ? 'translateX(20px)' : 'none' }} />
+            <Link href="/contact" className="btn-gold" style={{ padding: '9px 22px', fontSize: 12 }}>Get in Touch</Link>
+            <button onClick={() => setDark(!dark)} className="theme-btn" aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} style={{ width: 38, height: 38, borderRadius: '50%', border: `1.5px solid ${t.border}`, background: t.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .4s ease, border-color .3s, background .3s' }}>
+              <span key={dark ? 'moon' : 'sun'} style={{ display: 'inline-flex', animation: 'iconSpin .5s ease' }}>
+                {dark ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill={GOLD}/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
+                )}
+              </span>
             </button>
           </div>
         </nav>
@@ -206,19 +177,8 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             <span style={{ fontSize: 13, color: t.muted }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</span>
-            <button onClick={() => setCompareMode(v => !v)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, background: compareMode ? GOLD : 'none', border: `1.5px solid ${compareMode ? GOLD : t.border}`, color: compareMode ? '#fff' : t.muted, padding: '7px 16px', cursor: 'pointer', borderRadius: 100, transition: 'all .25s' }}>
-              {compareMode ? '✓ Comparing' : '⊞ Compare'}
-            </button>
           </div>
         </div>
-
-        {compareMode && (
-          <div style={{ background: `${GOLD}15`, borderBottom: `1px solid ${GOLD}30`, padding: '10px 72px', display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 13, color: GOLD, fontWeight: 500 }}>Select 2 projects · {compareList.length}/2</span>
-            {compareList.length === 2 && <button className="btn-gold" style={{ padding: '7px 18px', fontSize: 12 }} onClick={() => setShowCompare(true)}>Compare →</button>}
-            {compareList.length > 0 && <button onClick={() => setCompareList([])} style={{ fontSize: 12, background: 'none', border: 'none', color: t.muted, cursor: 'pointer' }}>Clear</button>}
-          </div>
-        )}
 
         {/* GRID */}
         <section className="pad" style={{ padding: '48px 72px 80px' }}>
@@ -241,30 +201,30 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
               {paginated.map((p, i) => (
                 <FadeIn key={p.id} delay={Math.min((i % 9) * 0.06, 0.36)}>
                   <div style={{ position: 'relative' }}>
-                    <div className="proj-card" style={{ background: t.surface }} onClick={() => { if (!compareMode) setSelected(p) }}>
-                      <div className="proj-img" style={{ height: 240 }}>
+                    <Link href={`/projects/${p.slug}`} className="proj-card" style={{ display: 'block', background: t.surface, border: `1px solid ${t.border}` }}>
+                      <div className="proj-img" style={{ height: i % 3 === 0 ? 320 : 240 }}>
                         {p.heroImage
                           ? <img src={p.heroImage} alt={p.title} loading="lazy" />
                           : <div style={{ height: '100%', background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '3rem', color: GOLD, opacity: .4 }}>{p.title.charAt(0)}</span></div>
                         }
-                        {compareMode && (
-                          <button className={`cmp-chk${inCompare(p) ? ' on' : ''}`} onClick={e => { e.stopPropagation(); toggleCompare(p) }}>
-                            {inCompare(p) ? <span style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>✓</span> : <span style={{ color: 'rgba(255,255,255,.7)', fontSize: 18 }}>+</span>}
-                          </button>
-                        )}
+                        <div className="proj-overlay">
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 22px' }}>
+                            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>{p.sector}</span>
+                          </div>
+                        </div>
                       </div>
                       <div style={{ padding: '18px 20px 22px', background: t.surface }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>{p.sector}</span>
-                          {p.year && <><span style={{ color: t.border }}>·</span><span style={{ fontSize: 11, color: t.muted }}>{p.year}</span></>}
-                          {p.area && <><span style={{ color: t.border }}>·</span><span style={{ fontSize: 11, color: t.muted }}>{p.area}</span></>}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, background: `${GOLD}18`, padding: '4px 11px', borderRadius: 20 }}>{p.sector}</span>
+                          {p.year && <span style={{ fontSize: 11, color: t.muted }}>{p.year}</span>}
+                          {p.area && <span style={{ fontSize: 11, color: t.muted }}>· {p.area}</span>}
                         </div>
                         <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.3rem', fontWeight: 500, color: t.ink, marginBottom: 6, lineHeight: 1.25 }}>{p.title}</h3>
                         {p.location && <p style={{ fontSize: 12, color: t.muted, marginBottom: 8 }}>📍 {p.location}</p>}
                         {p.description && <p style={{ fontSize: 13, color: t.muted, lineHeight: 1.7, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.description}</p>}
                         <div style={{ marginTop: 12, fontSize: 12, fontWeight: 600, color: GOLD }}>View Project →</div>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 </FadeIn>
               ))}
@@ -277,86 +237,6 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
           )}
         </section>
 
-        {/* LIGHTBOX */}
-        {selected && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(15,14,10,.97)', display: 'flex', flexDirection: 'column', animation: 'fadeUp .25s ease' }}>
-            <div style={{ height: 64, display: 'flex', alignItems: 'center', padding: '0 40px', borderBottom: '1px solid rgba(255,255,255,.08)', flexShrink: 0 }}>
-              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer', fontSize: 14, padding: 0 }}>← Back</button>
-              <Link href={`/projects/${selected.slug}`} style={{ marginLeft: 'auto', fontSize: 13, color: GOLD, borderBottom: `1px solid ${GOLD}40`, paddingBottom: 2 }}>Full Page →</Link>
-            </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '0 60px' }}>
-              {allImgs(selected)[imgIdx] && <img src={allImgs(selected)[imgIdx]} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} />}
-              {allImgs(selected).length > 1 && <>
-                <button className="lb-arr" onClick={() => setImgIdx(i => Math.max(i-1,0))} style={{ position: 'absolute', left: 16, opacity: imgIdx===0?.3:1 }}>‹</button>
-                <button className="lb-arr" onClick={() => setImgIdx(i => Math.min(i+1,allImgs(selected).length-1))} style={{ position: 'absolute', right: 16, opacity: imgIdx===allImgs(selected).length-1?.3:1 }}>›</button>
-                <div style={{ position: 'absolute', top: 16, right: 72, fontSize: 12, color: 'rgba(255,255,255,.35)' }}>{imgIdx+1} / {allImgs(selected).length}</div>
-              </>}
-            </div>
-            <div style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', gap: 40, flexShrink: 0, flexWrap: 'wrap' }}>
-              <div>
-                <span style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, display: 'block', marginBottom: 4 }}>{selected.sector}</span>
-                <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.3rem', fontWeight: 400, color: '#f0ebe3' }}>{selected.title}</h3>
-              </div>
-              {selected.location && <div><div style={{ fontSize: 10, color: dark ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.4)', letterSpacing: '.12em', marginBottom: 3 }}>LOCATION</div><div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>{selected.location}</div></div>}
-              {selected.year && <div><div style={{ fontSize: 10, color: dark ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.4)', letterSpacing: '.12em', marginBottom: 3 }}>YEAR</div><div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>{selected.year}</div></div>}
-              {selected.client && <div><div style={{ fontSize: 10, color: dark ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.4)', letterSpacing: '.12em', marginBottom: 3 }}>CLIENT</div><div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>{selected.client}</div></div>}
-              {selected.area && <div><div style={{ fontSize: 10, color: dark ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.4)', letterSpacing: '.12em', marginBottom: 3 }}>AREA</div><div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>{selected.area}</div></div>}
-            </div>
-            {allImgs(selected).length > 1 && (
-              <div style={{ display: 'flex', gap: 6, padding: '8px 40px 16px', overflowX: 'auto', flexShrink: 0, borderTop: '1px solid rgba(255,255,255,.05)' }}>
-                {allImgs(selected).map((src, i) => (
-                  <div key={i} onClick={() => setImgIdx(i)} style={{ width: 60, height: 44, flexShrink: 0, borderRadius: 4, overflow: 'hidden', cursor: 'pointer', border: `2px solid ${i===imgIdx?GOLD:'transparent'}`, opacity: i===imgIdx?1:.4, transition: 'all .2s' }}>
-                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* COMPARE MODAL */}
-        {showCompare && compareList.length === 2 && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(15,14,10,.97)', display: 'flex', flexDirection: 'column', animation: 'fadeUp .25s ease' }}>
-            <div style={{ height: 64, display: 'flex', alignItems: 'center', padding: '0 40px', borderBottom: '1px solid rgba(255,255,255,.08)', flexShrink: 0 }}>
-              <button onClick={() => setShowCompare(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer', fontSize: 14, padding: 0 }}>← Back</button>
-              <div style={{ margin: '0 auto', fontSize: 13, letterSpacing: '.16em', textTransform: 'uppercase', color: GOLD, fontWeight: 500 }}>Project Comparison</div>
-              <button onClick={() => { setCompareList([]); setShowCompare(false); setCompareMode(false) }} style={{ fontSize: 12, background: 'none', border: '1px solid rgba(255,255,255,.2)', color: 'rgba(255,255,255,.5)', padding: '6px 16px', cursor: 'pointer', borderRadius: 100 }}>Clear</button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: '42vh', minHeight: 260 }}>
-                {compareList.map(p => (
-                  <div key={p.id} style={{ position: 'relative', overflow: 'hidden' }}>
-                    {p.heroImage ? <img src={p.heroImage} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /> : <div style={{ width: '100%', height: '100%', background: '#2a2820' }} />}
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,14,10,.92) 0%, transparent 50%)' }} />
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 28px' }}>
-                      <span style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, display: 'block', marginBottom: 6 }}>{p.sector}</span>
-                      <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 400, color: '#fff', lineHeight: 1.15 }}>{p.title}</h2>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 1fr', padding: '40px', gap: 0, maxWidth: 900, margin: '0 auto' }}>
-                {[{label:'Client',key:'client'},{label:'Location',key:'location'},{label:'Year',key:'year'},{label:'Sector',key:'sector'},{label:'Area',key:'area'},{label:'Description',key:'description'}].map(({label,key}) => (
-                  <React.Fragment key={key}>
-                    <div style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,.07)', paddingRight: 20, fontWeight: 600 }}>{label}</div>
-                    {compareList.map(p => (
-                      <div key={p.id} style={{ fontSize: 14, color: 'rgba(255,255,255,.65)', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,.07)', lineHeight: 1.6, borderLeft: '1px solid rgba(255,255,255,.04)' }}>{String((p as any)[key]||'—')}</div>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 1fr', padding: '20px 40px 56px', maxWidth: 900, margin: '0 auto' }}>
-                <div />
-                {compareList.map(p => (
-                  <div key={p.id} style={{ padding: '0 20px' }}>
-                    <Link href={`/projects/${p.slug}`} style={{ fontSize: 13, color: GOLD, borderBottom: `1px solid ${GOLD}40`, paddingBottom: 2 }}>View Full Project →</Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* FOOTER */}
         <footer style={{ background: DARK, color: '#f0ebe3', padding: '80px 72px 48px' }}>
           <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 64 }}>
@@ -365,7 +245,7 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
               <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.35)', lineHeight: 1.9, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
             </div>
             {[
-              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/contact', 'Contact'], ['/careers', 'Careers']] as [string, string][] },
+              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
               { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045'], ['#', 'Mon–Sat · 9am–6pm']] as [string, string][] },
               { t: 'Connect', items: [['mailto:info@prospectiveinteriors.com', 'info@prospectiveinteriors.com'], ['tel:+919876543210', '+91 98765 43210']] as [string, string][] },
             ].map(col => (

@@ -161,6 +161,8 @@ export default function CareerClient() {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Inter',sans-serif;transition:background .4s,color .4s}a{text-decoration:none;color:inherit}::selection{background:${GOLD}40}
         @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+        @keyframes iconSpin{from{opacity:0;transform:rotate(-90deg) scale(.5)}to{opacity:1;transform:rotate(0) scale(1)}}
+        .theme-btn:hover{transform:scale(1.08);border-color:${GOLD}!important}
         @keyframes scrollLine{0%{transform:translateY(-100%)}100%{transform:translateY(260%)}}
         .nav-a{font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .25s;text-decoration:none}.nav-a:hover{color:${GOLD}!important}
         .tog{width:44px;height:24px;border-radius:12px;cursor:pointer;position:relative;display:flex;align-items:center;padding:3px;transition:background .3s;border:1.5px solid;flex-shrink:0}
@@ -187,11 +189,18 @@ export default function CareerClient() {
         <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 300, height: 68, display: 'flex', alignItems: 'center', padding: '0 56px', gap: 40, background: scrolled ? (dark ? 'rgba(17,16,9,.97)' : 'rgba(247,244,239,.97)') : 'transparent', backdropFilter: scrolled ? 'blur(20px)' : 'none', borderBottom: scrolled ? `1px solid ${t.border}` : 'none', transition: 'background .4s' }}>
           <Link href="/"><Logo onDark={!scrolled || dark} /></Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
-            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/contact', 'Contact'], ['/careers', 'Careers']] as [string, string][]).map(([href, label]) => (
+            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} className="nav-a" style={{ color: scrolled ? (href === '/careers' ? GOLD : t.muted) : (href === '/careers' ? '#fff' : 'rgba(255,255,255,.65)'), borderBottom: href === '/careers' ? `1px solid ${GOLD}` : '1px solid transparent', paddingBottom: 2 }}>{label}</Link>
             ))}
-            <button className="tog" onClick={() => setDark(!dark)} style={{ background: dark ? GOLD : '#ddd5c5', borderColor: dark ? GOLD : '#ccc4b4' }} aria-label="Toggle theme">
-              <div className="tok-k" style={{ background: dark ? DARK : '#fff', transform: dark ? 'translateX(20px)' : 'none' }} />
+            <Link href="/contact" className="btn-gold" style={{ padding: '9px 22px', fontSize: 12 }}>Get in Touch</Link>
+            <button onClick={() => setDark(!dark)} className="theme-btn" aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} style={{ width: 38, height: 38, borderRadius: '50%', border: `1.5px solid ${scrolled ? t.border : 'rgba(255,255,255,.35)'}`, background: scrolled ? t.surface : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .4s ease, border-color .3s, background .3s' }}>
+              <span key={dark ? 'moon' : 'sun'} style={{ display: 'inline-flex', animation: 'iconSpin .5s ease' }}>
+                {dark ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill={GOLD}/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
+                )}
+              </span>
             </button>
           </div>
         </nav>
@@ -407,7 +416,7 @@ export default function CareerClient() {
           <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 56 }}>
             <div><Logo onDark /><p style={{ fontSize: 13, color: 'rgba(255,255,255,.4)', lineHeight: 1.85, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design firm creating meaningful spaces across India since 2004.</p></div>
             {[
-              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/contact', 'Contact'], ['/careers', 'Careers']] as [string, string][] },
+              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
               { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045']] as [string, string][] },
               { t: 'Connect', items: [['mailto:info@prospectiveinteriors.com', 'info@prospectiveinteriors.com'], ['mailto:hr@prospectiveinteriors.com', 'hr@prospectiveinteriors.com']] as [string, string][] },
             ].map(col => (

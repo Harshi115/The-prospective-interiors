@@ -31,7 +31,9 @@ function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode
 
 function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t: any }) {
   const [allProjects, setAllProjects] = useState<any[]>(projects)
-  
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+
   useEffect(() => {
     const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
     fetch(`${STRAPI}/api/projects?populate[heroImage]=true&pagination[limit]=9`)
@@ -53,31 +55,121 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
       .catch(() => {})
   }, [])
 
-  const display = allProjects.slice(0, 6)
+  const images = allProjects.slice(0, 5)
+
+  // Keyboard navigation + body scroll lock while lightbox is open
+  useEffect(() => {
+    if (lightboxIdx === null) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null)
+      if (e.key === 'ArrowRight') setLightboxIdx(i => i === null ? null : (i + 1) % images.length)
+      if (e.key === 'ArrowLeft') setLightboxIdx(i => i === null ? null : (i - 1 + images.length) % images.length)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
+  }, [lightboxIdx, images.length])
+
+  const handlePanMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const dx = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+    const dy = ((e.clientY - rect.top) / rect.height - 0.5) * 2
+    setPan({ x: dx * -18, y: dy * -18 })
+  }
+
+  // 6-slot grid: 5 project images + 1 quote card, tall cells at slot 0 and 3 (matches original rhythm)
+  const slots: ({ kind: 'image'; p: any; imgIndex: number } | { kind: 'quote' })[] = []
+  let ii = 0
+  for (let slot = 0; slot < 6; slot++) {
+    if (slot === 2) { slots.push({ kind: 'quote' }); continue }
+    if (images[ii]) { slots.push({ kind: 'image', p: images[ii], imgIndex: ii }); ii++ }
+  }
+
+  const active = lightboxIdx !== null ? images[lightboxIdx] : null
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-      {display.map((p, i) => (
-        <FadeIn key={p.id} delay={i * 0.07}>
-          <Link href={`/projects/${p.slug}`} style={{ display: 'block', borderRadius: 10, overflow: 'hidden', position: 'relative', height: i === 0 || i === 3 ? 320 : 240, cursor: 'pointer', textDecoration: 'none' }}
-            onMouseEnter={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'scale(1.07)' }}
-            onMouseLeave={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'none' }}>
-            {p.heroImage
-              ? <img src={p.heroImage} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .7s ease' }} />
-              : <div style={{ width: '100%', height: '100%', background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '2.5rem', color: GOLD, opacity: .4 }}>{p.title.charAt(0)}</span></div>
-            }
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,.8) 0%, transparent 55%)', opacity: 0, transition: 'opacity .4s' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0'}>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 22px' }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, marginBottom: 4 }}>{p.sector}</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.2rem', color: '#fff', lineHeight: 1.2 }}>{p.title}</div>
-              </div>
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        {slots.map((slot, i) => {
+          const tall = i === 0 || i === 3
+          if (slot.kind === 'quote') {
+            return (
+              <FadeIn key={`quote-${i}`} delay={i * 0.07}>
+                <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 10, background: dark ? 'linear-gradient(160deg, #241f16 0%, #1c1a14 100%)' : 'linear-gradient(160deg, #f3ead9 0%, #ebdec3 100%)', border: `1px solid ${GOLD}40`, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 30px', height: tall ? 320 : 240 }}>
+                  <span style={{ position: 'absolute', top: -22, left: 6, fontFamily: "'Cormorant Garamond', serif", fontSize: '8rem', color: GOLD, opacity: .16, lineHeight: 1, userSelect: 'none' }}>"</span>
+                  <p style={{ position: 'relative', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: '1.18rem', color: t.ink, lineHeight: 1.6, marginBottom: 18 }}>
+                    Every space carries a story — our craft is giving it the right words.
+                  </p>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 22, height: 1, background: GOLD }} />
+                    <span style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: t.muted, fontWeight: 600 }}>The Prospective Interiors</span>
+                  </div>
+                </div>
+              </FadeIn>
+            )
+          }
+          const p = slot.p
+          return (
+            <FadeIn key={p.id} delay={i * 0.07}>
+              <button
+                onClick={() => setLightboxIdx(slot.imgIndex)}
+                aria-label={`Zoom into ${p.title}`}
+                style={{ display: 'block', width: '100%', border: 'none', padding: 0, borderRadius: 10, overflow: 'hidden', position: 'relative', height: tall ? 320 : 240, cursor: 'zoom-in', background: 'none', font: 'inherit' }}
+                onMouseEnter={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'scale(1.04)' }}
+                onMouseLeave={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'none' }}>
+                {p.heroImage
+                  ? <img src={p.heroImage} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .7s ease' }} />
+                  : <div style={{ width: '100%', height: '100%', background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '2.5rem', color: GOLD, opacity: .4 }}>{p.title.charAt(0)}</span></div>
+                }
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,.8) 0%, transparent 55%)', opacity: 0, transition: 'opacity .4s' }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0'}>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 22px', textAlign: 'left' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, marginBottom: 4 }}>{p.sector}</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.2rem', color: '#fff', lineHeight: 1.2 }}>{p.title}</div>
+                  </div>
+                </div>
+              </button>
+            </FadeIn>
+          )
+        })}
+      </div>
+
+      {/* LIGHTBOX */}
+      {active && (
+        <div
+          role="dialog" aria-modal="true"
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(8,6,4,.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'lbFade .3s ease' }}
+          onClick={() => setLightboxIdx(null)}>
+
+          <button onClick={(e) => { e.stopPropagation(); setLightboxIdx(null) }} aria-label="Close" style={{ position: 'absolute', top: 28, right: 32, width: 42, height: 42, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+
+          {images.length > 1 && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i === null ? null : (i - 1 + images.length) % images.length); setPan({ x: 0, y: 0 }) }} aria-label="Previous image" style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', width: 46, height: 46, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 20, cursor: 'pointer', zIndex: 2 }}>‹</button>
+              <button onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i === null ? null : (i + 1) % images.length); setPan({ x: 0, y: 0 }) }} aria-label="Next image" style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', width: 46, height: 46, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 20, cursor: 'pointer', zIndex: 2 }}>›</button>
+            </>
+          )}
+
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '86vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'lbScaleIn .4s cubic-bezier(.2,.8,.2,1)' }}>
+            <div
+              onMouseMove={handlePanMove}
+              onMouseLeave={() => setPan({ x: 0, y: 0 })}
+              style={{ overflow: 'hidden', borderRadius: 8, maxWidth: '86vw', maxHeight: '68vh', boxShadow: '0 40px 100px rgba(0,0,0,.5)' }}>
+              {active.heroImage
+                ? <img src={active.heroImage} alt={active.title} style={{ display: 'block', width: '100%', height: '100%', maxHeight: '68vh', objectFit: 'contain', transform: `scale(1.14) translate(${pan.x}px, ${pan.y}px)`, transition: 'transform .25s ease-out' }} />
+                : <div style={{ width: '60vw', height: '50vh', background: '#2a2820', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '4rem', color: GOLD }}>{active.title.charAt(0)}</span></div>
+              }
             </div>
-          </Link>
-        </FadeIn>
-      ))}
-    </div>
+            <div style={{ marginTop: 22, textAlign: 'center' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: GOLD, marginBottom: 8 }}>{active.sector}</div>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.7rem', fontWeight: 400, color: '#fff', marginBottom: 16 }}>{active.title}</h3>
+              <Link href={`/projects/${active.slug}`} style={{ fontSize: 12.5, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}60`, paddingBottom: 3 }}>View Full Project →</Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -126,6 +218,18 @@ export default function HomeClient({ data }: { data: HomeData }) {
     return () => obs.disconnect()
   }, [data.stats])
 
+  const heroProjects = data.projects.filter(p => p.heroImage).slice(0, 6)
+  const heroImages = (data.heroImages && data.heroImages.length > 0)
+    ? data.heroImages
+    : (data.heroImage ? [data.heroImage] : (heroProjects.length > 0 ? heroProjects.map(p => p.heroImage) : []))
+  const usingProjectHero = !(data.heroImages && data.heroImages.length > 0) && !data.heroImage && heroProjects.length > 0
+  const [heroSlide, setHeroSlide] = useState(0)
+  useEffect(() => {
+    if (heroImages.length < 2) return
+    const timer = setInterval(() => setHeroSlide(s => (s + 1) % heroImages.length), 6000)
+    return () => clearInterval(timer)
+  }, [heroImages.length])
+
   if (!mounted) return null
 
   const t = {
@@ -136,8 +240,6 @@ export default function HomeClient({ data }: { data: HomeData }) {
     surface: dark ? '#1c1a14' : '#fff',
     subtle: dark ? '#161410' : '#f0ebe3',
   }
-
-  const heroImg = data.heroImages?.[0] || data.heroImage
 
   const getStatDisplay = (stat: Stat) => {
     const num = parseInt(stat.value.replace(/\D/g, ''))
@@ -159,6 +261,10 @@ export default function HomeClient({ data }: { data: HomeData }) {
         ::selection{background:${GOLD}40}
         @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
         @keyframes scrollLine{0%{transform:translateY(-100%)}100%{transform:translateY(260%)}}
+        @keyframes iconSpin{from{opacity:0;transform:rotate(-90deg) scale(.5)}to{opacity:1;transform:rotate(0) scale(1)}}
+        @keyframes lbFade{from{opacity:0}to{opacity:1}}
+        @keyframes lbScaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+        .theme-btn:hover{transform:scale(1.08);border-color:${GOLD}!important}
         .nav-a{font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .25s;text-decoration:none}.nav-a:hover{color:${GOLD}!important}
         .tog{width:44px;height:24px;border-radius:12px;cursor:pointer;position:relative;display:flex;align-items:center;padding:3px;transition:background .3s;border:1.5px solid;flex-shrink:0}
         .tok-k{width:16px;height:16px;border-radius:8px;transition:transform .3s}
@@ -174,7 +280,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
         .proj-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,12,10,.85) 0%,transparent 55%);opacity:0;transition:opacity .4s}
         .proj-card:hover .proj-overlay{opacity:1}
         .ft-link{font-size:13px;color:rgba(255,255,255,.4);transition:color .2s;text-decoration:none}.ft-link:hover{color:${GOLD}}
-        @media(max-width:900px){.proj-grid{grid-template-columns:1fr 1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.ft-g{grid-template-columns:1fr 1fr!important}}
+        @media(max-width:900px){.proj-grid{grid-template-columns:1fr 1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.ft-g{grid-template-columns:1fr 1fr!important}.stats-wrap{justify-content:center!important}.about-firm{grid-template-columns:1fr!important;gap:40px!important}}
         @media(max-width:600px){.proj-grid{grid-template-columns:1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.pad{padding-left:24px!important;padding-right:24px!important}.ft-g{grid-template-columns:1fr!important}}
       `}</style>
 
@@ -184,19 +290,33 @@ export default function HomeClient({ data }: { data: HomeData }) {
         <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 300, height: 72, display: 'flex', alignItems: 'center', padding: '0 56px', gap: 40, background: scrolled ? (dark ? 'rgba(17,16,9,.97)' : 'rgba(247,244,239,.97)') : 'transparent', backdropFilter: scrolled ? 'blur(20px)' : 'none', borderBottom: scrolled ? `1px solid ${t.border}` : 'none', transition: 'all .4s' }}>
           <Link href="/"><Logo onDark={!scrolled || dark} /></Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 36 }}>
-            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/contact', 'Contact'], ['/careers', 'Careers']] as [string, string][]).map(([href, label]) => (
+            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} className="nav-a" style={{ color: scrolled ? (href === '/' ? GOLD : t.muted) : 'rgba(255,255,255,.8)' }}>{label}</Link>
             ))}
-            <button className="tog" onClick={() => setDark(!dark)} style={{ background: dark ? GOLD : '#ddd5c5', borderColor: dark ? GOLD : '#ccc4b4' }} aria-label="Toggle theme">
-              <div className="tok-k" style={{ background: dark ? DARK : '#fff', transform: dark ? 'translateX(20px)' : 'none' }} />
+            <Link href="/contact" className="btn-gold" style={{ padding: '9px 22px', fontSize: 12 }}>Get in Touch</Link>
+            <button onClick={() => setDark(!dark)} className="theme-btn" aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} style={{ width: 38, height: 38, borderRadius: '50%', border: `1.5px solid ${scrolled ? t.border : 'rgba(255,255,255,.35)'}`, background: scrolled ? t.surface : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .4s ease, border-color .3s, background .3s' }}>
+              <span key={dark ? 'moon' : 'sun'} style={{ display: 'inline-flex', animation: 'iconSpin .5s ease' }}>
+                {dark ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill={GOLD}/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
+                )}
+              </span>
             </button>
           </div>
         </nav>
 
         {/* HERO */}
         <section style={{ position: 'relative', height: '100vh', minHeight: 700, overflow: 'hidden' }}>
-          {heroImg
-            ? <img src={heroImg} alt="Hero" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+          {heroImages.length > 0
+            ? heroImages.map((img, i) => (
+                <img key={img + i} src={img} alt="Hero" style={{
+                  position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center',
+                  opacity: i === heroSlide ? 1 : 0,
+                  transform: i === heroSlide ? 'scale(1.09)' : 'scale(1)',
+                  transition: 'opacity 1.6s ease, transform 7s ease-out',
+                }} />
+              ))
             : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #2a2420 0%, ${DARK} 100%)` }} />
           }
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,.92) 0%, rgba(10,8,6,.5) 45%, rgba(10,8,6,.25) 100%)' }} />
@@ -215,8 +335,25 @@ export default function HomeClient({ data }: { data: HomeData }) {
             </div>
           </div>
 
+          {/* Slide indicators */}
+          {heroImages.length > 1 && (
+            <div style={{ position: 'absolute', bottom: 48, left: 72, display: 'flex', gap: 8, zIndex: 5 }}>
+              {heroImages.map((_, i) => (
+                <button key={i} onClick={() => setHeroSlide(i)} aria-label={`Show slide ${i + 1}`} style={{ width: i === heroSlide ? 28 : 8, height: 4, borderRadius: 2, border: 'none', background: i === heroSlide ? GOLD : 'rgba(255,255,255,.35)', cursor: 'pointer', transition: 'all .5s ease', padding: 0 }} />
+              ))}
+            </div>
+          )}
+
+          {/* Current project caption, JHID-style — only when hero is sourced from projects */}
+          {usingProjectHero && heroProjects[heroSlide] && (
+            <Link href={`/projects/${heroProjects[heroSlide].slug}`} style={{ position: 'absolute', bottom: 48, right: 72, zIndex: 5, textAlign: 'right', textDecoration: 'none' }}>
+              <p style={{ fontSize: 11, letterSpacing: '.1em', color: 'rgba(255,255,255,.55)', marginBottom: 4 }}>Home / {heroProjects[heroSlide].title}</p>
+              <p style={{ fontSize: 12, color: GOLD, fontWeight: 600, borderBottom: `1px solid ${GOLD}60`, display: 'inline-block', paddingBottom: 2 }}>View Project →</p>
+            </Link>
+          )}
+
           {/* Scroll indicator */}
-          <div style={{ position: 'absolute', bottom: 48, right: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <div style={{ position: 'absolute', bottom: 130, right: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 1, height: 64, background: 'rgba(255,255,255,.2)', overflow: 'hidden', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: GOLD, animation: 'scrollLine 2s ease-in-out infinite' }} />
             </div>
@@ -225,22 +362,57 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
         {/* STATS */}
         <div ref={statsRef} style={{ background: dark ? '#0d0c08' : DARK, padding: '72px 72px' }}>
-          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${data.stats.length || 4}, 1fr)`, gap: 0, maxWidth: 1000, margin: '0 auto' }}>
-            {(data.stats.length ? data.stats : [
-              { label: 'Years of Excellence', value: '20+' },
-              { label: 'Projects Delivered', value: '200+' },
-              { label: 'Sectors Served', value: '8' },
-              { label: 'Design Awards', value: '12' },
-            ]).map((stat, i) => (
-              <div key={stat.label} style={{ textAlign: 'center', padding: '24px 32px', borderRight: i < 3 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(3.2rem,5vw,5rem)', color: GOLD, fontWeight: 400, lineHeight: 1, marginBottom: 12 }}>
-                  {getStatDisplay(stat)}
+          <div className="stats-wrap" style={{ display: 'flex', gap: 56, alignItems: 'center', maxWidth: 1280, margin: '0 auto', flexWrap: 'wrap' }}>
+            <div style={{ flex: '0 0 260px', maxWidth: 300 }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3rem', color: GOLD, lineHeight: .4, marginBottom: 14 }}>"</div>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: '1.2rem', color: 'rgba(255,255,255,.75)', lineHeight: 1.65 }}>
+                Good design is a quiet conversation between space, light and the people who live in it.
+              </p>
+              <div style={{ width: 32, height: 1, background: GOLD, marginTop: 20 }} />
+            </div>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${data.stats.length || 4}, 1fr)`, gap: 0, flex: 1 }}>
+              {(data.stats.length ? data.stats : [
+                { label: 'Years of Excellence', value: '20+' },
+                { label: 'Projects Delivered', value: '200+' },
+                { label: 'Sectors Served', value: '8' },
+                { label: 'Design Awards', value: '12' },
+              ]).map((stat, i) => (
+                <div key={stat.label} style={{ textAlign: 'center', padding: '24px 32px', borderRight: i < 3 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(3.2rem,5vw,5rem)', color: GOLD, fontWeight: 400, lineHeight: 1, marginBottom: 12 }}>
+                    {getStatDisplay(stat)}
+                  </div>
+                  <div style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', fontWeight: 600 }}>{stat.label}</div>
                 </div>
-                <div style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', fontWeight: 600 }}>{stat.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* ABOUT THE FIRM */}
+        <section className="pad about-firm" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}`, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 72, alignItems: 'center' }}>
+          <FadeIn>
+            <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>— Who We Are —</p>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.9rem,3vw,2.8rem)', fontStyle: 'italic', fontWeight: 400, color: t.ink, lineHeight: 1.35, marginBottom: 28 }}>
+              {data.philosophyText || 'Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs.'}
+            </h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 24px', marginBottom: 28 }}>
+              <span style={{ fontSize: 13, color: t.ink, fontWeight: 600 }}>Est. 2004 · Pune, India</span>
+              <span style={{ color: t.border }}>|</span>
+              <span style={{ fontSize: 13, color: t.muted }}>Led by Principal Designer <span style={{ color: t.ink, fontWeight: 600 }}>Prashant Bhandiya</span></span>
+            </div>
+            <Link href="/about" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3 }}>Learn About Our Studio →</Link>
+          </FadeIn>
+          <FadeIn delay={0.15}>
+            <div style={{ background: t.subtle, border: `1px solid ${t.border}`, borderRadius: 12, padding: '36px 32px' }}>
+              <p style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: t.muted, fontWeight: 700, marginBottom: 20 }}>Sectors We Design For</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {['Hospitality', 'Industrial', 'Healthcare', 'Retail', 'Residential', 'Commercial', 'Civic', 'Educational'].map(sector => (
+                  <span key={sector} style={{ fontSize: 12.5, color: t.ink, background: t.surface, border: `1px solid ${t.border}`, padding: '8px 16px', borderRadius: 20 }}>{sector}</span>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+        </section>
 
         {/* FEATURED PROJECTS */}
         {data.projects.length > 0 && (
@@ -249,16 +421,17 @@ export default function HomeClient({ data }: { data: HomeData }) {
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56, flexWrap: 'wrap', gap: 24 }}>
                 <div>
                   <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Featured Work —</p>
-                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1 }}>Spaces We're Proud Of</h2>
+                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 14 }}>Spaces We're Proud Of</h2>
+                  <p style={{ fontSize: 13.5, color: t.muted, maxWidth: 460, lineHeight: 1.7 }}>A handful of favourites, pulled from 200+ projects completed across hospitality, healthcare, retail, residential and industrial sectors.</p>
                 </div>
                 <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3, whiteSpace: 'nowrap' }}>View All Projects →</Link>
               </div>
             </FadeIn>
 
-            <div className="proj-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+            <div className="proj-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }}>
               {data.projects.slice(0, 3).map((p, i) => (
                 <FadeIn key={p.id} delay={i * 0.12}>
-                  <Link href={`/projects/${p.slug}`} className="proj-card" style={{ display: 'block', background: t.surface }}>
+                  <Link href={`/projects/${p.slug}`} className="proj-card" style={{ display: 'block', background: t.surface, border: `1px solid ${t.border}` }}>
                     <div className="proj-img" style={{ height: i === 0 ? 380 : 280 }}>
                       {p.heroImage
                         ? <img src={p.heroImage} alt={p.title} loading="lazy" />
@@ -267,16 +440,17 @@ export default function HomeClient({ data }: { data: HomeData }) {
                       <div className="proj-overlay">
                         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 28px' }}>
                           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, marginBottom: 6 }}>{p.sector}</div>
-                          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.4rem', fontWeight: 400, color: '#fff', lineHeight: 1.2 }}>{p.title}</div>
+                          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.4rem', fontWeight: 400, color: '#fff', lineHeight: 1.2, marginBottom: 10 }}>{p.title}</div>
+                          <div style={{ fontSize: 11.5, fontWeight: 600, color: GOLD }}>View Project →</div>
                         </div>
                       </div>
                     </div>
-                    <div style={{ padding: '20px 22px 24px', background: t.surface }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>{p.sector}</span>
-                        {p.year && <><span style={{ color: t.border }}>·</span><span style={{ fontSize: 11, color: t.muted }}>{p.year}</span></>}
+                    <div style={{ padding: '22px 24px 26px', background: t.surface }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, background: `${GOLD}18`, padding: '4px 11px', borderRadius: 20 }}>{p.sector}</span>
+                        {p.year && <span style={{ fontSize: 11, color: t.muted }}>{p.year}</span>}
                       </div>
-                      <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.35rem', fontWeight: 500, color: t.ink, marginBottom: 6, lineHeight: 1.25 }}>{p.title}</h3>
+                      <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.4rem', fontWeight: 500, color: t.ink, marginBottom: 6, lineHeight: 1.25 }}>{p.title}</h3>
                       {p.location && <p style={{ fontSize: 12, color: t.muted }}>📍 {p.location}</p>}
                     </div>
                   </Link>
@@ -325,7 +499,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
               <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.35)', lineHeight: 1.9, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
             </div>
             {[
-              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/contact', 'Contact'], ['/careers', 'Careers']] as [string, string][] },
+              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
               { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045'], ['#', 'Mon–Sat · 9am–6pm']] as [string, string][] },
               { t: 'Connect', items: [['mailto:info@prospectiveinteriors.com', 'info@prospectiveinteriors.com'], ['tel:+919876543210', '+91 98765 43210']] as [string, string][] },
             ].map(col => (

@@ -13,7 +13,7 @@ export default async function HomePage() {
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
   const [pagesRes, statsRes, servicesRes, teamRes, projectsRes] = await Promise.all([
-    fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate=heroImage`, { headers, next: { revalidate: 60 } }),
+    fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImage]=true`, { headers, next: { revalidate: 60 } }),
     fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
     fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
     fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
@@ -33,11 +33,20 @@ export default async function HomePage() {
     return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
   }
 
+  // "heroImage" in Strapi is configured as MULTIPLE media, so it comes back as an
+  // array of media objects (or { data: [...] } depending on response shape) — not
+  // a single object. Normalize defensively to a plain array of URL strings.
+  const rawHeroImages = Array.isArray(page.heroImage)
+    ? page.heroImage
+    : (page.heroImage?.data ?? (page.heroImage ? [page.heroImage] : []))
+  const heroImages = rawHeroImages.map((img: any) => getImgUrl(img)).filter(Boolean)
+
   const data = {
     heroHeadline:   page.heroHeadline   ?? 'Designing Spaces That Shape The Future',
     heroSubtext:    page.heroSubtext    ?? 'A 20-year legacy of transforming spaces across hospitality, healthcare, retail, residential and industrial sectors.',
     philosophyText: page.philosophyText ?? 'Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs.',
-    heroImage:      getImgUrl(page.heroImage),
+    heroImage:      heroImages[0] ?? '',
+    heroImages,
 
     stats: (statsJson?.data ?? []).map((s: any) => ({
       label: s.label ?? '',

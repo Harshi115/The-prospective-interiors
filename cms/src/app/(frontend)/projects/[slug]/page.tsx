@@ -11,6 +11,27 @@ const getImgUrl = (media: any) => {
   return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
 }
 
+// Strapi's Rich Text (Blocks) field returns a structured JSON array, not a plain
+// string. This safely handles BOTH plain-text/textarea fields and Blocks fields,
+// so the description shows either way.
+const getDescriptionText = (desc: any): string => {
+  if (!desc) return ''
+  if (typeof desc === 'string') return desc
+  if (Array.isArray(desc)) {
+    return desc
+      .map((block: any) => {
+        if (typeof block === 'string') return block
+        if (Array.isArray(block?.children)) {
+          return block.children.map((child: any) => child?.text ?? '').join('')
+        }
+        return ''
+      })
+      .filter(Boolean)
+      .join('\n\n')
+  }
+  return ''
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   try {
@@ -39,6 +60,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     const raw = json?.data?.[0]
     if (!raw) notFound()
 
+    // Helpful during setup/debugging — safe to remove once confirmed working.
+    console.log('Project raw.description from Strapi:', JSON.stringify(raw.description))
+
     const project = {
       id:          String(raw.id),
       title:       raw.title       ?? '',
@@ -49,7 +73,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       sector:      raw.sector      ?? '',
       area:        raw.area        ?? '',
       featured:    raw.featured    ?? false,
-      description: raw.description ?? '',
+      description: getDescriptionText(raw.description),
       heroImage:   getImgUrl(raw.heroImage),
       gallery: (raw.gallery ?? [])
         .map((img: any) => {
