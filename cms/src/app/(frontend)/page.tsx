@@ -16,7 +16,7 @@ const FALLBACK_DATA = {
   stats: [] as { label: string; value: string }[],
   services: [] as { id: string; title: string; description: string }[],
   team: [] as { id: string; name: string; role: string; bio: string; photo: string }[],
-  projects: [] as { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string }[],
+  projects: [] as { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }[],
 }
 
 export default async function HomePage() {
@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   try {
     const [pagesRes, statsRes, servicesRes, teamRes, projectsRes] = await Promise.all([
-      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImage]=true`, { headers, next: { revalidate: 60 } }),
+      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImage]=true&populate[heroImages]=true`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
@@ -48,18 +48,20 @@ export default async function HomePage() {
       return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
     }
 
-    // "heroImage" may be configured as Single or Multiple media depending on
-    // environment — normalize defensively to a plain array of URL strings either way.
-    const rawHeroImages = Array.isArray(page.heroImage)
-      ? page.heroImage
-      : (page.heroImage?.data ?? (page.heroImage ? [page.heroImage] : []))
+    // Dedicated "heroImages" field (Multiple media) — the real slideshow source.
+    const rawHeroImages = Array.isArray(page.heroImages)
+      ? page.heroImages
+      : (page.heroImages?.data ?? [])
     const heroImages = rawHeroImages.map((img: any) => getImgUrl(img)).filter(Boolean)
+
+    // Original single "heroImage" field — used as a fallback if heroImages is empty.
+    const heroImageSingle = getImgUrl(page.heroImage)
 
     const data = {
       heroHeadline:   page.heroHeadline   ?? FALLBACK_DATA.heroHeadline,
       heroSubtext:    page.heroSubtext    ?? FALLBACK_DATA.heroSubtext,
       philosophyText: page.philosophyText ?? FALLBACK_DATA.philosophyText,
-      heroImage:      heroImages[0] ?? '',
+      heroImage:      heroImageSingle,
       heroImages,
 
       stats: (statsJson?.data ?? []).map((s: any) => ({
@@ -82,14 +84,15 @@ export default async function HomePage() {
       })),
 
       projects: (projectsJson?.data ?? []).map((p: any) => ({
-        id:        String(p.id),
-        title:     p.title    ?? '',
-        slug:      p.slug     ?? String(p.id),
-        location:  p.location ?? '',
-        year:      p.year     ?? null,
-        sector:    p.sector   ?? '',
-        client:    p.client   ?? '',
-        heroImage: getImgUrl(p.heroImage),
+        id:          String(p.id),
+        title:       p.title       ?? '',
+        slug:        p.slug        ?? String(p.id),
+        location:    p.location    ?? '',
+        year:        p.year        ?? null,
+        sector:      p.sector      ?? '',
+        client:      p.client      ?? '',
+        heroImage:   getImgUrl(p.heroImage),
+        description: p.description ?? '',
       })),
     }
 
