@@ -344,16 +344,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
             </div>
           )}
 
-          {/* Current project caption, JHID-style — only when hero is sourced from projects */}
-          {usingProjectHero && heroProjects[heroSlide] && (
-            <Link href={`/projects/${heroProjects[heroSlide].slug}`} style={{ position: 'absolute', bottom: 48, right: 72, zIndex: 5, textAlign: 'right', textDecoration: 'none' }}>
-              <p style={{ fontSize: 11, letterSpacing: '.1em', color: 'rgba(255,255,255,.55)', marginBottom: 4 }}>Home / {heroProjects[heroSlide].title}</p>
-              <p style={{ fontSize: 12, color: GOLD, fontWeight: 600, borderBottom: `1px solid ${GOLD}60`, display: 'inline-block', paddingBottom: 2 }}>View Project →</p>
-            </Link>
-          )}
-
           {/* Scroll indicator */}
-          <div style={{ position: 'absolute', bottom: 130, right: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <div style={{ position: 'absolute', bottom: 48, right: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 1, height: 64, background: 'rgba(255,255,255,.2)', overflow: 'hidden', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: GOLD, animation: 'scrollLine 2s ease-in-out infinite' }} />
             </div>

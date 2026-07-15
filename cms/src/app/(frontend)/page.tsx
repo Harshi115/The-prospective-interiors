@@ -25,13 +25,14 @@ export default async function HomePage() {
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
   try {
-    const [pagesRes, statsRes, servicesRes, teamRes, projectsRes] = await Promise.all([
-      // Only "heroImages" (plural) exists on Page now — the old singular
-      // "heroImage" field was replaced, so we don't populate it anymore.
-      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[heroImages]=true`, { headers, next: { revalidate: 60 } }),
+    const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes] = await Promise.all([
+      fetch(`${STRAPI}/api/pages?pagination[limit]=1`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
+      // ALL projects (no featured filter) — their photos become the hero slideshow.
+      fetch(`${STRAPI}/api/projects?pagination[limit]=10&populate=heroImage`, { headers, next: { revalidate: 60 } }),
+      // Still fetch featured ones separately for the "Featured Work" section further down the page.
       fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&pagination[limit]=3&populate=heroImage`, { headers, next: { revalidate: 60 } }),
     ])
 
@@ -39,12 +40,8 @@ export default async function HomePage() {
     const statsJson    = statsRes.ok    ? await statsRes.json()    : { data: [] }
     const servicesJson = servicesRes.ok ? await servicesRes.json() : { data: [] }
     const teamJson     = teamRes.ok     ? await teamRes.json()     : { data: [] }
-    const projectsJson = projectsRes.ok ? await projectsRes.json() : { data: [] }
-
-    if (!pagesRes.ok) {
-      const errText = await pagesRes.text().catch(() => '')
-      console.error('Pages API error:', pagesRes.status, errText)
-    }
+    const allProjectsJson = allProjectsRes.ok ? await allProjectsRes.json() : { data: [] }
+    const featuredJson    = featuredRes.ok    ? await featuredRes.json()    : { data: [] }
 
     // Strapi v5 — data directly on object, no .attributes needed
     const page = pagesJson?.data?.[0] ?? {}
@@ -55,12 +52,25 @@ export default async function HomePage() {
       return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
     }
 
-    // "heroImages" (Multiple media) — the slideshow source. Normalize defensively
-    // since Strapi can return either a plain array or a { data: [...] } wrapper.
-    const rawHeroImages = Array.isArray(page.heroImages)
-      ? page.heroImages
-      : (page.heroImages?.data ?? [])
-    const heroImages = rawHeroImages.map((img: any) => getImgUrl(img)).filter(Boolean)
+    const mapProject = (p: any) => ({
+      id:          String(p.id),
+      title:       p.title       ?? '',
+      slug:        p.slug        ?? String(p.id),
+      location:    p.location    ?? '',
+      year:        p.year        ?? null,
+      sector:      p.sector      ?? '',
+      client:      p.client      ?? '',
+      heroImage:   getImgUrl(p.heroImage),
+      description: p.description ?? '',
+    })
+
+    const allProjects = (allProjectsJson?.data ?? []).map(mapProject)
+    const featuredProjects = (featuredJson?.data ?? []).map(mapProject)
+    // Fall back to all projects for the Featured Work section too, if none are marked featured.
+    const projects = featuredProjects.length > 0 ? featuredProjects : allProjects.slice(0, 3)
+
+    // Hero slideshow — every project's photo, no caption/link shown (just clean images).
+    const heroImages = allProjects.map((p: ReturnType<typeof mapProject>) => p.heroImage).filter(Boolean)
 
     const data = {
       heroHeadline:   page.heroHeadline   ?? FALLBACK_DATA.heroHeadline,
@@ -88,17 +98,7 @@ export default async function HomePage() {
         photo: getImgUrl(m.photo),
       })),
 
-      projects: (projectsJson?.data ?? []).map((p: any) => ({
-        id:          String(p.id),
-        title:       p.title       ?? '',
-        slug:        p.slug        ?? String(p.id),
-        location:    p.location    ?? '',
-        year:        p.year        ?? null,
-        sector:      p.sector      ?? '',
-        client:      p.client      ?? '',
-        heroImage:   getImgUrl(p.heroImage),
-        description: p.description ?? '',
-      })),
+      projects,
     }
 
     return <HomeClient data={data} />
