@@ -17,9 +17,9 @@
     "heroSubtext": {
       "type": "string"
     },
-    "heroImage": {
+    "heroImages": {
       "type": "media",
-      "multiple": false,
+      "multiple": true,
       "allowedTypes": [
         "images",
         "files",
