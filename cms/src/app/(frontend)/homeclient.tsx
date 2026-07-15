@@ -10,7 +10,7 @@ const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
 interface Stat { label: string; value: string }
 interface Project { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }
-interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[] }
+interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[] }
 
 function Logo({ onDark = false }: { onDark?: boolean }) {
   return (

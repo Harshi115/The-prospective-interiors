@@ -10,17 +10,7 @@ const DARK = '#1a1814'
 interface Service { id: string; title: string; description: string }
 interface Member { id: string; name: string; role: string; bio: string; photo: string }
 interface Stat { label: string; value: string }
-
-
-const VALUES = [
-  { v: 'Honesty', d: 'We are transparent about every decision — from budgets to timelines. Our clients always know exactly where things stand.' },
-  { v: 'Transparency', d: 'No hidden costs, no surprises. Every project is documented and communicated clearly at every stage.' },
-  { v: 'Timeliness', d: 'A delayed space costs real money. Our record of on-time delivery across 200+ projects is something we are genuinely proud of.' },
-  { v: 'Innovation', d: 'Every project gives us a reason to think differently. We push creative and technical boundaries while keeping practicality central.' },
-  { v: 'Passion', d: 'Design is not just a profession for us — it is how we see the world. That passion shows in every detail we obsess over.' },
-  { v: 'Attention to Detail', d: 'The details most people never consciously notice are the ones we obsess over. Every junction, material and finish is a considered decision.' },
-  { v: 'Value-Add', d: 'Great design should always deliver more than it costs. We measure success by how much we improve every rupee our clients invest.' },
-]
+interface Value { id: string; title: string; description: string }
 
 const DSVCS = [
   { id: '1', title: 'Network Design', description: 'Strategic space planning and network layout optimised for flow, function and future flexibility.' },
@@ -91,7 +81,7 @@ function CountUp({ value, visible }: { value: string; visible: boolean }) {
   return <>{d}</>
 }
 
-export default function AboutClient({ services, team, stats }: { services: Service[]; team: Member[]; stats: Stat[] }) {
+export default function AboutClient({ services, team, stats, values }: { services: Service[]; team: Member[]; stats: Stat[]; values: Value[] }) {
   const [dark, setDarkSt] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -107,9 +97,9 @@ export default function AboutClient({ services, team, stats }: { services: Servi
   }, [])
   useEffect(() => { const fn = () => setScrolled(window.scrollY > 60); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn) }, [])
   useEffect(() => {
-    valTimer.current = setInterval(() => setActiveVal(v => (v + 1) % VALUES.length), 3500)
+    valTimer.current = setInterval(() => setActiveVal(v => (v + 1) % values.length), 3500)
     return () => { if (valTimer.current) clearInterval(valTimer.current) }
-  }, [])
+  }, [values.length])
 
   if (!mounted) return null
 
@@ -272,19 +262,19 @@ export default function AboutClient({ services, team, stats }: { services: Servi
           </FadeIn>
           <div className="val-g" style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 32, alignItems: 'start' }}
             onMouseEnter={() => { if (valTimer.current) clearInterval(valTimer.current) }}
-            onMouseLeave={() => { valTimer.current = setInterval(() => setActiveVal(v => (v + 1) % VALUES.length), 3500) }}>
+            onMouseLeave={() => { valTimer.current = setInterval(() => setActiveVal(v => (v + 1) % values.length), 3500) }}>
             <div>
-              {VALUES.map((v, i) => (
-                <button key={v.v} className="val-btn" onClick={() => setActiveVal(i)} style={{ borderBottomColor: t.border }}>
-                  <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', fontWeight: 400, color: activeVal === i ? GOLD : t.muted, transition: 'color .3s' }}>{v.v}</span>
+              {values.map((v, i) => (
+                <button key={v.id} className="val-btn" onClick={() => setActiveVal(i)} style={{ borderBottomColor: t.border }}>
+                  <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', fontWeight: 400, color: activeVal === i ? GOLD : t.muted, transition: 'color .3s' }}>{v.title}</span>
                   {activeVal === i && <span style={{ fontSize: 10, color: GOLD, fontWeight: 700 }}>0{i + 1}</span>}
                 </button>
               ))}
             </div>
             <div key={activeVal} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: '40px 44px', animation: 'valIn .4s ease both' }}>
-              <div style={{ fontSize: 10, letterSpacing: '.16em', color: GOLD, marginBottom: 16, fontWeight: 700 }}>0{activeVal + 1} / 07</div>
-              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 400, color: t.ink, marginBottom: 16, lineHeight: 1.1 }}>{VALUES[activeVal]?.v}</h3>
-              <p style={{ fontSize: 15, color: t.muted, lineHeight: 1.9 }}>{VALUES[activeVal]?.d}</p>
+              <div style={{ fontSize: 10, letterSpacing: '.16em', color: GOLD, marginBottom: 16, fontWeight: 700 }}>0{activeVal + 1} / {String(values.length).padStart(2, '0')}</div>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 400, color: t.ink, marginBottom: 16, lineHeight: 1.1 }}>{values[activeVal]?.title}</h3>
+              <p style={{ fontSize: 15, color: t.muted, lineHeight: 1.9 }}>{values[activeVal]?.description}</p>
             </div>
           </div>
         </section>

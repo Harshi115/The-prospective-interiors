@@ -113,7 +113,7 @@ export default function CareerClient() {
     }
   }
 
-  const applyFor = (job: typeof OPENINGS[0]) => {
+  const applyFor = (job: typeof FALLBACK_OPENINGS[0]) => {
     setSelected(job)
     setForm(p => ({ ...p, position: job.title }))
     setTimeout(() => {
