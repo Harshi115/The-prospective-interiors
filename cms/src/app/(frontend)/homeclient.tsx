@@ -10,9 +10,24 @@ const CREAM = '#FAF7F1'
 const DARK = '#111315'
 const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
+// Place these 7 files inside your project's /public/gallery/ folder
+const GALLERY_IMAGES: GalleryItem[] = [
+  { src: '/gallery/project-01.webp' },
+  { src: '/gallery/project-02.webp' },
+  { src: '/gallery/project-03.webp' },
+  { src: '/gallery/project-04.webp' },
+  { src: '/gallery/project-05.webp' },
+  { src: '/gallery/project-06.jpg' },
+  { src: '/gallery/project-07.webp' },
+  { src: '/gallery/project-08.webp' },
+  { src: '/gallery/project-09.webp' },
+  { src: '/gallery/project-10.webp' },
+]
+
 interface Stat { label: string; value: string }
 interface Project { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }
-interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[] }
+interface GalleryItem { src: string }
+interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[]; gallery?: GalleryItem[] }
 
 function Logo({ onDark = false }: { onDark?: boolean }) {
   return (
@@ -38,21 +53,28 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
 
   useEffect(() => {
     const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
-    fetch(`${STRAPI}/api/projects?populate[heroImage]=true&pagination[limit]=9`)
+    const mapProjects = (json: any) => (json?.data ?? []).map((p: any) => ({
+      id: String(p.id),
+      title: p.title ?? '',
+      slug: p.slug ?? String(p.id),
+      sector: p.sector ?? '',
+      heroImage: (() => {
+        const url = p.heroImage?.url ?? ''
+        return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+      })(),
+    }))
+    fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&populate[heroImage]=true&pagination[limit]=9`)
       .then(r => r.json())
       .then(json => {
-        const mapped = (json?.data ?? []).map((p: any) => ({
-          id: String(p.id),
-          title: p.title ?? '',
-          slug: p.slug ?? String(p.id),
-          sector: p.sector ?? '',
-          heroImage: (() => {
-            const url = p.heroImage?.url ?? ''
-            const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
-            return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
-          })(),
-        }))
-        if (mapped.length > 0) setAllProjects(mapped)
+        const mapped = mapProjects(json)
+        if (mapped.length > 0) { setAllProjects(mapped); return }
+        // No featured projects set yet — fall back to all projects so the gallery isn't empty.
+        return fetch(`${STRAPI}/api/projects?populate[heroImage]=true&pagination[limit]=9`)
+          .then(r => r.json())
+          .then(fallbackJson => {
+            const fallbackMapped = mapProjects(fallbackJson)
+            if (fallbackMapped.length > 0) setAllProjects(fallbackMapped)
+          })
       })
       .catch(() => {})
   }, [])
@@ -79,28 +101,34 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
     setPan({ x: dx * -18, y: dy * -18 })
   }
 
-  // 6-slot grid: 5 project images + 1 quote card, tall cells at slot 0 and 3 (matches original rhythm)
+  // Build a grid that adapts to however many images are actually available —
+  // avoids empty gaps when only a few featured projects exist. Quote card is
+  // only included when there's enough real content to keep the grid feeling full.
   const slots: ({ kind: 'image'; p: any; imgIndex: number } | { kind: 'quote' })[] = []
-  let ii = 0
-  for (let slot = 0; slot < 6; slot++) {
-    if (slot === 2) { slots.push({ kind: 'quote' }); continue }
-    if (images[ii]) { slots.push({ kind: 'image', p: images[ii], imgIndex: ii }); ii++ }
+  if (images.length >= 4) {
+    let ii = 0
+    for (let slot = 0; slot < 6; slot++) {
+      if (slot === 2) { slots.push({ kind: 'quote' }); continue }
+      if (images[ii]) { slots.push({ kind: 'image', p: images[ii], imgIndex: ii }); ii++ }
+    }
+  } else {
+    images.forEach((p, ii) => slots.push({ kind: 'image', p, imgIndex: ii }))
   }
 
   const active = lightboxIdx !== null ? images[lightboxIdx] : null
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(slots.length, 3) || 1}, 1fr)`, gap: 12 }}>
         {slots.map((slot, i) => {
-          const tall = i === 0 || i === 3
+          const tall = slots.length >= 4 && (i === 0 || i === 3)
           if (slot.kind === 'quote') {
             return (
               <FadeIn key={`quote-${i}`} delay={i * 0.07}>
                 <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 10, background: dark ? 'linear-gradient(160deg, #241f16 0%, #1c1a14 100%)' : 'linear-gradient(160deg, #f3ead9 0%, #ebdec3 100%)', border: `1px solid ${GOLD}40`, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 30px', height: tall ? 320 : 240 }}>
                   <span style={{ position: 'absolute', top: -22, left: 6, fontFamily: "'Cormorant Garamond', serif", fontSize: '8rem', color: GOLD, opacity: .16, lineHeight: 1, userSelect: 'none' }}>"</span>
                   <p style={{ position: 'relative', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: '1.18rem', color: t.ink, lineHeight: 1.6, marginBottom: 18 }}>
-                    Every space carries a story — our craft is giving it the right words.
+                    200+ spaces. Not one of them looks like the other. That's the point.
                   </p>
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 22, height: 1, background: GOLD }} />
@@ -115,22 +143,14 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
             <FadeIn key={p.id} delay={i * 0.07}>
               <button
                 onClick={() => setLightboxIdx(slot.imgIndex)}
-                aria-label={`Zoom into ${p.title}`}
-                style={{ display: 'block', width: '100%', border: 'none', padding: 0, borderRadius: 10, overflow: 'hidden', position: 'relative', height: tall ? 320 : 240, cursor: 'zoom-in', background: 'none', font: 'inherit' }}
-                onMouseEnter={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'scale(1.04)' }}
+                aria-label="View larger image"
+                style={{ display: 'block', width: '100%', border: 'none', padding: 0, borderRadius: 10, overflow: 'hidden', position: 'relative', height: tall ? 320 : 240, cursor: 'zoom-in', background: 'none', font: 'inherit', boxShadow: dark ? 'none' : '0 8px 28px rgba(0,0,0,.06)' }}
+                onMouseEnter={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'scale(1.05)' }}
                 onMouseLeave={e => { const img = e.currentTarget.querySelector('img') as HTMLImageElement; if (img) img.style.transform = 'none' }}>
                 {p.heroImage
-                  ? <img src={p.heroImage} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .7s ease' }} />
-                  : <div style={{ width: '100%', height: '100%', background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '2.5rem', color: GOLD, opacity: .4 }}>{p.title.charAt(0)}</span></div>
+                  ? <img src={p.heroImage} alt="Interior design" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .7s ease' }} />
+                  : <div style={{ width: '100%', height: '100%', background: dark ? '#2a2820' : '#e8e0d0' }} />
                 }
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,.8) 0%, transparent 55%)', opacity: 0, transition: 'opacity .4s' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0'}>
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 22px', textAlign: 'left' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, marginBottom: 4 }}>{p.sector}</div>
-                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.2rem', color: '#fff', lineHeight: 1.2 }}>{p.title}</div>
-                  </div>
-                </div>
               </button>
             </FadeIn>
           )
@@ -159,14 +179,9 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
               onMouseLeave={() => setPan({ x: 0, y: 0 })}
               style={{ overflow: 'hidden', borderRadius: 8, maxWidth: '86vw', maxHeight: '68vh', boxShadow: '0 40px 100px rgba(0,0,0,.5)' }}>
               {active.heroImage
-                ? <img src={active.heroImage} alt={active.title} style={{ display: 'block', width: '100%', height: '100%', maxHeight: '68vh', objectFit: 'contain', transform: `scale(1.14) translate(${pan.x}px, ${pan.y}px)`, transition: 'transform .25s ease-out' }} />
-                : <div style={{ width: '60vw', height: '50vh', background: '#2a2820', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '4rem', color: GOLD }}>{active.title.charAt(0)}</span></div>
+                ? <img src={active.heroImage} alt="Interior design" style={{ display: 'block', width: '100%', height: '100%', maxHeight: '68vh', objectFit: 'contain', transform: `scale(1.14) translate(${pan.x}px, ${pan.y}px)`, transition: 'transform .25s ease-out' }} />
+                : <div style={{ width: '60vw', height: '50vh', background: '#2a2820' }} />
               }
-            </div>
-            <div style={{ marginTop: 22, textAlign: 'center' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: GOLD, marginBottom: 8 }}>{active.sector}</div>
-              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.7rem', fontWeight: 400, color: '#fff', marginBottom: 16 }}>{active.title}</h3>
-              <Link href={`/projects/${active.slug}`} style={{ fontSize: 12.5, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}60`, paddingBottom: 3 }}>View Full Project →</Link>
             </div>
           </div>
         </div>
@@ -212,7 +227,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
     })
   }
 
-  const statsRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLElement>(null)
   useEffect(() => {
     if (!statsRef.current) return
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) startCounters() }, { threshold: 0.3 })
@@ -221,6 +236,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
   }, [data.stats])
 
   const heroProjects = data.projects.filter(p => p.heroImage).slice(0, 6)
+  // Prefer gallery images from Strapi if provided; fall back to the local curated set.
+  const galleryImages = (data.gallery && data.gallery.length > 0) ? data.gallery : GALLERY_IMAGES
   const heroImages = (data.heroImages && data.heroImages.length > 0)
     ? data.heroImages
     : (data.heroImage ? [data.heroImage] : (heroProjects.length > 0 ? heroProjects.map(p => p.heroImage) : []))
@@ -274,33 +291,48 @@ export default function HomeClient({ data }: { data: HomeData }) {
         .btn-gold:hover{background:${GOLD_HOVER};border-color:${GOLD_HOVER};transform:translateY(-2px)}
         .btn-outline{display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;background:transparent;color:#F3F0EA;padding:14px 36px;border-radius:6px;border:1.5px solid rgba(216,195,165,.7);cursor:pointer;transition:all .25s;text-decoration:none;letter-spacing:.04em}
         .btn-outline:hover{border-color:${GOLD};background:rgba(216,195,165,.10)}
-        .proj-card{border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .4s,box-shadow .4s,border-color .4s;border:1px solid rgba(216,195,165,.10);box-shadow:0 20px 60px rgba(0,0,0,.28)}
-        .proj-card:hover{transform:translateY(-6px);border-color:rgba(216,195,165,.35);box-shadow:0 24px 70px rgba(0,0,0,.42)}
+        .proj-card{border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .4s,box-shadow .4s,border-color .4s;border:1px solid rgba(216,195,165,.18);box-shadow:0 10px 32px rgba(30,25,15,.08)}
+        .proj-card:hover{transform:translateY(-6px);border-color:rgba(216,195,165,.5);box-shadow:0 20px 48px rgba(30,25,15,.14)}
         .proj-img{overflow:hidden;position:relative}
         .proj-img img{transition:transform .8s ease;width:100%;height:100%;object-fit:cover;display:block}
         .proj-card:hover .proj-img img{transform:scale(1.04)}
         .proj-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(17,19,21,.85) 0%,transparent 55%);opacity:0;transition:opacity .4s}
         .proj-card:hover .proj-overlay{opacity:1}
         .ft-link{font-size:13px;color:rgba(255,255,255,.4);transition:color .2s;text-decoration:none}.ft-link:hover{color:${GOLD}}
-        @media(max-width:900px){.proj-grid{grid-template-columns:1fr 1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.ft-g{grid-template-columns:1fr 1fr!important}.stats-wrap{justify-content:center!important}.about-firm{grid-template-columns:1fr!important;gap:40px!important}}
-        @media(max-width:600px){.proj-grid{grid-template-columns:1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.pad{padding-left:24px!important;padding-right:24px!important}.ft-g{grid-template-columns:1fr!important}}
+        .feat-img-wrap img:hover{transform:scale(1.05)}
+        .process-card:hover{border-color:${GOLD}!important;transform:translateY(-4px);box-shadow:0 16px 40px rgba(30,25,15,.08)}
+        .process-card:hover .process-card-line{width:44px}
+        .bento-card:hover .bento-card-img{transform:scale(1.07)}
+        .bento-card:hover .bento-card-arrow{opacity:1!important;transform:translateX(0)!important}
+        .palo-card:hover .palo-card-img{transform:scale(1.06)}
+        .gallery-item:hover .gallery-item-img{transform:scale(1.06)}
+        @media(max-width:900px){.proj-grid{grid-template-columns:1fr 1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.ft-g{grid-template-columns:1fr 1fr!important}.stats-wrap{justify-content:center!important}.about-firm{grid-template-columns:1fr!important;gap:40px!important}.services-grid{grid-template-columns:1fr 1fr!important}.process-grid{grid-template-columns:1fr 1fr 1fr!important;row-gap:40px!important}.process-timeline{display:none!important}.feat-spread{grid-template-columns:1fr!important;direction:ltr!important;gap:24px!important}.testi-grid{grid-template-columns:1fr!important}.palo-grid{grid-template-columns:1fr 1fr!important}.bento-grid{grid-template-columns:1fr 1fr!important}.gallery-masonry{column-count:2!important}.stats-combo{grid-template-columns:1fr!important}.stats-combo>div:first-child{height:280px!important}}
+        @media(max-width:600px){.palo-grid{grid-template-columns:1fr!important}.process-grid{grid-template-columns:1fr 1fr!important}.bento-grid{grid-template-columns:1fr!important}.bento-grid>div{grid-column:span 1!important}.gallery-masonry{column-count:1!important}}
+        @media(max-width:600px){.proj-grid{grid-template-columns:1fr!important}.stats-grid{grid-template-columns:repeat(2,1fr)!important}.pad{padding-left:24px!important;padding-right:24px!important}.ft-g{grid-template-columns:1fr!important}.services-grid{grid-template-columns:1fr!important}.process-grid{grid-template-columns:1fr!important;row-gap:32px!important}}
       `}</style>
 
       <div style={{ minHeight: '100vh', background: t.bg, color: t.ink, transition: 'background .4s,color .4s' }}>
 
-        {/* NAV */}
-        <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 300, height: 72, display: 'flex', alignItems: 'center', padding: '0 56px', gap: 40, background: scrolled ? (dark ? 'rgba(17,16,9,.97)' : 'rgba(247,244,239,.97)') : 'transparent', backdropFilter: scrolled ? 'blur(20px)' : 'none', borderBottom: scrolled ? `1px solid ${t.border}` : 'none', transition: 'all .4s' }}>
-          <Link href="/"><Logo onDark={!scrolled || dark} /></Link>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 36 }}>
+{/* HEADER */}
+        <header style={{ position: 'sticky', top: 0, zIndex: 300, background: t.bg, borderBottom: `1px solid ${t.border}`, padding: '0 56px', height: 68, display: 'flex', alignItems: 'center', gap: 40 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 1, height: 30, background: GOLD, opacity: .5 }} />
+            <div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
+              <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+            </div>
+          </Link>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
             {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} className="nav-a" style={{ color: scrolled ? (href === '/' ? GOLD : t.muted) : 'rgba(255,255,255,.8)' }}>{label}</Link>
+              <Link key={href} href={href} className="nav-a" style={{ color: href === '/' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
             ))}
-            <Link href="/contact" className="btn-gold" style={{ padding: '9px 22px', fontSize: 12 }}>Get in Touch</Link>
+            <Link href="/contact" className="btn-gold" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
           </div>
-        </nav>
+        </header>
 
-        {/* HERO */}
-        <section style={{ position: 'relative', height: '100vh', minHeight: 700, overflow: 'hidden' }}>
+        
+{/* HERO */}
+        <section style={{ position: 'relative', height: '90vh', minHeight: 620, overflow: 'hidden' }}>
           {heroImages.length > 0
             ? heroImages.map((img, i) => (
                 <img key={img + i} src={img} alt="Hero" style={{
@@ -312,14 +344,14 @@ export default function HomeClient({ data }: { data: HomeData }) {
               ))
             : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #2a2420 0%, ${DARK} 100%)` }} />
           }
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(17,19,21,.88) 0%, rgba(17,19,21,.62) 38%, rgba(17,19,21,.18) 68%, rgba(17,19,21,.04) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.15) 0%, rgba(17,19,21,.35) 55%, rgba(17,19,21,.82) 100%)' }} />
           
           <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 100px', animation: 'fadeUp 1.2s ease .2s both' }}>
-            <p style={{ fontSize: 11, letterSpacing: '.28em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 600 }}>EST. 2004 · PUNE, INDIA</p>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,4vw,4.5rem)', fontWeight: 400, color: '#fff', lineHeight: 1.04, maxWidth: 900, marginBottom: 28, textShadow: '0 2px 24px rgba(0,0,0,.4)' }}>
+            <p style={{ fontSize: 12, letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 700 }}>EST. 2004 · PUNE, INDIA</p>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4.5vw,5rem)', fontWeight: 500, color: '#fff', lineHeight: 1.05, maxWidth: 900, marginBottom: 28, textShadow: '0 4px 32px rgba(0,0,0,.6)' }}>
               {data.heroHeadline || 'Designing Spaces That Shape The Future'}
             </h1>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, maxWidth: 520, marginBottom: 48, fontWeight: 300 }}>
+            <p style={{ fontSize: 16, color: '#fff', lineHeight: 1.85, maxWidth: 520, marginBottom: 48, fontWeight: 400, textShadow: '0 2px 16px rgba(0,0,0,.6)' }}>
               {data.heroSubtext || 'A 20-year legacy of transforming spaces across hospitality, healthcare, retail, residential and industrial sectors.'}
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -336,44 +368,10 @@ export default function HomeClient({ data }: { data: HomeData }) {
               ))}
             </div>
           )}
-
-          {/* Scroll indicator */}
-          <div style={{ position: 'absolute', bottom: 48, right: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 1, height: 64, background: 'rgba(255,255,255,.2)', overflow: 'hidden', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: GOLD, animation: 'scrollLine 2s ease-in-out infinite' }} />
-            </div>
-          </div>
         </section>
 
-        {/* STATS */}
-        <div ref={statsRef} style={{ background: dark ? '#0d0c08' : DARK, padding: '72px 72px' }}>
-          <div className="stats-wrap" style={{ display: 'flex', gap: 56, alignItems: 'center', maxWidth: 1280, margin: '0 auto', flexWrap: 'wrap' }}>
-            <div style={{ flex: '0 0 260px', maxWidth: 300 }}>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3rem', color: GOLD, lineHeight: .4, marginBottom: 14 }}>"</div>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: '1.2rem', color: 'rgba(255,255,255,.75)', lineHeight: 1.65 }}>
-                Good design is a quiet conversation between space, light and the people who live in it.
-              </p>
-              <div style={{ width: 32, height: 1, background: GOLD, marginTop: 20 }} />
-            </div>
-            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${data.stats.length || 4}, 1fr)`, gap: 0, flex: 1 }}>
-              {(data.stats.length ? data.stats : [
-                { label: 'Years of Excellence', value: '20+' },
-                { label: 'Projects Delivered', value: '200+' },
-                { label: 'Sectors Served', value: '8' },
-                { label: 'Design Awards', value: '12' },
-              ]).map((stat, i) => (
-                <div key={stat.label} style={{ textAlign: 'center', padding: '24px 32px', borderRight: i < 3 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(3.2rem,5vw,5rem)', color: GOLD, fontWeight: 400, lineHeight: 1, marginBottom: 12 }}>
-                    {getStatDisplay(stat)}
-                  </div>
-                  <div style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', fontWeight: 600 }}>{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ABOUT THE FIRM */}
+        
+{/* ABOUT THE FIRM */}
         <section className="pad about-firm" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}`, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 72, alignItems: 'center' }}>
           <FadeIn>
             <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>— Who We Are —</p>
@@ -399,71 +397,185 @@ export default function HomeClient({ data }: { data: HomeData }) {
           </FadeIn>
         </section>
 
-        {/* FEATURED PROJECTS */}
-        {data.projects.length > 0 && (
-          <section className="pad" style={{ padding: '96px 72px', borderBottom: `1px solid ${t.border}` }}>
+        
+{/* SERVICES */}
+        {data.services.length > 0 && (
+          <section className="pad" style={{ padding: '96px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
             <FadeIn>
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56, flexWrap: 'wrap', gap: 24 }}>
-                <div>
-                  <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Featured Work —</p>
-                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 14 }}>Spaces We're Proud Of</h2>
-                  <p style={{ fontSize: 13.5, color: t.muted, maxWidth: 460, lineHeight: 1.7 }}>A handful of favourites, pulled from 200+ projects completed across hospitality, healthcare, retail, residential and industrial sectors.</p>
-                </div>
-                <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3, whiteSpace: 'nowrap' }}>View All Projects →</Link>
-              </div>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>— What We Do —</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 56, textAlign: 'center' }}>Our Services</h2>
             </FadeIn>
-
-            <div className="proj-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }}>
-              {data.projects.slice(0, 3).map((p, i) => (
-                <FadeIn key={p.id} delay={i * 0.12}>
-                  <Link href={`/projects/${p.slug}`} className="proj-card" style={{ display: 'block', background: t.surface, border: `1px solid ${t.border}` }}>
-                    <div className="proj-img" style={{ height: i === 0 ? 380 : 280 }}>
-                      {p.heroImage
-                        ? <img src={p.heroImage} alt={p.title} loading="lazy" />
-                        : <div style={{ height: '100%', background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '3rem', color: GOLD, opacity: .4 }}>{p.title.charAt(0)}</span></div>
-                      }
-                      <div style={{ position: 'absolute', top: 18, left: 18, fontSize: 11, fontWeight: 700, letterSpacing: '.12em', color: '#fff', background: 'rgba(17,19,21,.55)', backdropFilter: 'blur(6px)', padding: '5px 12px', borderRadius: 20 }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </div>
-                      <div className="proj-overlay">
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 28px' }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: GOLD, display: 'flex', alignItems: 'center', gap: 6 }}>View Project <span>→</span></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ padding: '24px 24px 28px', background: t.surface }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: GOLD }}>{p.sector}</span>
-                        {p.year && <><span style={{ color: t.border }}>·</span><span style={{ fontSize: 11.5, color: t.muted }}>{p.year}</span></>}
-                      </div>
-                      <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(1.6rem,2vw,2rem)', fontWeight: 500, color: t.ink, marginBottom: 8, lineHeight: 1.15 }}>{p.title}</h3>
-                      {p.location && <p style={{ fontSize: 12.5, color: t.muted }}>📍 {p.location}</p>}
-                    </div>
-                  </Link>
+            <div className="services-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 1200, margin: '0 auto' }}>
+              {data.services.map((s: any, i: number) => (
+                <FadeIn key={s.id} delay={Math.min(i * 0.08, 0.4)}>
+                  <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: '36px 30px', height: '100%' }}>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: GOLD, marginBottom: 18, fontWeight: 400 }}>{String(i + 1).padStart(2, '0')}</div>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.4rem', fontWeight: 500, color: t.ink, marginBottom: 12, lineHeight: 1.25 }}>{s.title}</h3>
+                    <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.75 }}>{s.description}</p>
+                  </div>
                 </FadeIn>
               ))}
             </div>
           </section>
         )}
 
-        {/* PROJECT GALLERY */}
-        <section className="pad" style={{ padding: '80px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
-          <FadeIn>
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 48, flexWrap: 'wrap', gap: 20 }}>
-              <div>
-                <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Our Portfolio —</p>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem,3.5vw,3.2rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1 }}>A Glimpse of Our Work</h2>
+        
+{/* FEATURED PROJECTS */}
+        {data.projects.length > 0 && (
+          <section className="pad" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}` }}>
+            <FadeIn>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 60, flexWrap: 'wrap', gap: 24 }}>
+                <div>
+                  <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Featured Work —</p>
+                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1 }}>Spaces We're Proud Of</h2>
+                  <p style={{ fontSize: 13.5, color: t.muted, maxWidth: 460, lineHeight: 1.7, marginTop: 14 }}>A curated look at our portfolio — favourites pulled from 200+ projects across residential, hospitality and retail sectors.</p>
+                </div>
+                <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3, whiteSpace: 'nowrap' }}>View All Projects →</Link>
               </div>
-              <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3 }}>View All →</Link>
+            </FadeIn>
+
+            <div className="bento-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridAutoRows: 340, gap: 20, maxWidth: 1360, margin: '0 auto' }}>
+              {data.projects.slice(0, 6).map((p, i) => {
+                const big = i === 0 && data.projects.length >= 5
+                return (
+                  <FadeIn key={p.id} delay={Math.min(i * 0.08, 0.4)} style={{ gridColumn: big ? 'span 2' : 'span 1' }}>
+                    <Link href={`/projects/${p.slug}`} className="bento-card" style={{ display: 'block', position: 'relative', height: '100%', minHeight: 340, borderRadius: 6, overflow: 'hidden', textDecoration: 'none', border: `1px solid ${t.border}` }}>
+                      {p.heroImage
+                        ? <img src={p.heroImage} alt={p.title} loading="lazy" className="bento-card-img" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .8s ease' }} />
+                        : <div style={{ position: 'absolute', inset: 0, background: dark ? '#2a2820' : '#e8e0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '3.4rem', color: GOLD, opacity: .45 }}>{p.title.charAt(0)}</span></div>
+                      }
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,12,10,.85) 0%, rgba(15,12,10,.22) 42%, transparent 68%)' }} />
+                      <div style={{ position: 'absolute', top: 18, left: 20, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(255,255,255,.7)', fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}>{String(i + 1).padStart(2, '0')}</div>
+                      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '24px 26px' }}>
+                        {p.sector && <p style={{ fontSize: 9.5, letterSpacing: '.18em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginBottom: 8 }}>{p.sector}</p>}
+                        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: big ? 'clamp(1.6rem,2.4vw,2.1rem)' : 'clamp(1.3rem,1.8vw,1.6rem)', fontWeight: 500, color: '#fff', lineHeight: 1.15, marginBottom: 8 }}>{p.title}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                          {p.location && <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,.68)' }}>📍 {p.location}</p>}
+                          <span className="bento-card-arrow" style={{ fontSize: 11, color: GOLD, fontWeight: 600, opacity: 0, transform: 'translateX(-6px)', transition: 'opacity .3s ease, transform .3s ease', whiteSpace: 'nowrap' }}>View →</span>
+                        </div>
+                      </div>
+                    </Link>
+                  </FadeIn>
+                )
+              })}
             </div>
-          </FadeIn>
-          <GalleryGrid projects={data.projects} dark={dark} t={t} />
+          </section>
+        )}
+
+        
+{/* STATS + CLIENT VOICE */}
+        <section className="pad" ref={statsRef} style={{ padding: '0', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
+          <div className="stats-combo" style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', minHeight: 440 }}>
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
+              <img src={galleryImages[3]?.src || galleryImages[0]?.src} alt="A recent project" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .8s ease' }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'} />
+            </div>
+            <div style={{ padding: '68px 64px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(data.stats.length || 4, 4)}, 1fr)`, gap: 0, marginBottom: 48, paddingBottom: 44, borderBottom: `1px solid ${t.border}` }}>
+                {(data.stats.length ? data.stats : [
+                  { label: 'Years of Excellence', value: '20+' },
+                  { label: 'Projects Delivered', value: '200+' },
+                  { label: 'Sectors Served', value: '8' },
+                  { label: 'Design Awards', value: '12' },
+                ]).slice(0, 4).map((stat, i) => (
+                  <div key={stat.label} style={{ textAlign: 'left', paddingRight: 20 }}>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.4vw,3.2rem)', color: GOLD, fontWeight: 400, lineHeight: 1, marginBottom: 10 }}>
+                      {getStatDisplay(stat)}
+                    </div>
+                    <div style={{ fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', color: t.muted, fontWeight: 600, lineHeight: 1.5 }}>{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+              <FadeIn>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3rem', color: GOLD, lineHeight: .3, marginBottom: 12 }}>"</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(1.3rem,2vw,1.6rem)', color: t.ink, lineHeight: 1.55, marginBottom: 22, maxWidth: 460 }}>
+                  They understood exactly what we wanted before we could fully explain it ourselves — the space feels completely like us.
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 28, height: 1, background: GOLD }} />
+                  <span style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: GOLD, fontWeight: 600 }}>A Recent Client</span>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
         </section>
 
-        {/* CTA BANNER */}
-        <section style={{ position: 'relative', height: '55vh', minHeight: 360, overflow: 'hidden' }}>
-          <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1800&q=95" alt="CTA" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,8,6,.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 56px' }}>
+        
+{/* DESIGN JOURNEY */}
+        <section className="pad" style={{ padding: '104px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
+          <FadeIn>
+            <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 72px' }}>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— How We Work —</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>Our Design Journey</h2>
+              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>Five deliberate stages, refined over two decades, that take a space from a first conversation to a finished home.</p>
+            </div>
+          </FadeIn>
+
+          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+            {/* connecting timeline of numbers */}
+            <div className="process-timeline" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', position: 'relative', marginBottom: 28, padding: '0 34px' }}>
+              <div style={{ position: 'absolute', top: 17, left: '10%', right: '10%', height: 1, background: t.border, zIndex: 0 }} />
+              {['Consultation', 'Planning', 'Design', 'Execution', 'Handover'].map((label, i) => (
+                <div key={label} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', border: `1.5px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond', serif", fontSize: '.95rem', color: GOLD, background: t.subtle, fontWeight: 600 }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="process-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 18 }}>
+              {[
+                { step: 'Consultation', desc: 'We listen first — understanding how you live, work and dream in the space.' },
+                { step: 'Planning & Concept', desc: 'Site study, budgets and a design direction that fits your brief and lifestyle.' },
+                { step: 'Design Development', desc: 'Materials, layouts and 3D visuals refined until every detail feels right.' },
+                { step: 'Execution', desc: 'On-site craftsmanship, managed closely from foundation to finish.' },
+                { step: 'Final Handover', desc: 'A space that\'s ready to live in — styled, inspected, and truly yours.' },
+              ].map((p, i) => (
+                <FadeIn key={p.step} delay={i * 0.08}>
+                  <div className="process-card" style={{ position: 'relative', borderRadius: 6, height: 280, background: t.surface, border: `1px solid ${t.border}`, padding: '30px 24px', display: 'flex', flexDirection: 'column', transition: 'border-color .3s ease, transform .3s ease, box-shadow .3s ease' }}>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.2rem', fontWeight: 400, color: GOLD, opacity: .55, lineHeight: 1, marginBottom: 22 }}>{String(i + 1).padStart(2, '0')}</div>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', fontWeight: 500, color: t.ink, marginBottom: 12, lineHeight: 1.25 }}>{p.step}</h3>
+                    <p style={{ fontSize: 12, color: t.muted, lineHeight: 1.7 }}>{p.desc}</p>
+                    <div className="process-card-line" style={{ marginTop: 'auto', width: 24, height: 1, background: GOLD, transition: 'width .35s ease' }} />
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+
+        
+{/* GALLERY */}
+        <section className="pad" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}` }}>
+          <FadeIn>
+            <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 56px' }}>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Our Portfolio —</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>A Glimpse Into Our World</h2>
+              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>Moments from the homes we've shaped — texture, light and detail, captured room by room.</p>
+            </div>
+          </FadeIn>
+          <div className="gallery-masonry" style={{ columnCount: 3, columnGap: 18, maxWidth: 1280, margin: '0 auto' }}>
+            {galleryImages.map((g, i) => (
+              <FadeIn key={g.src} delay={Math.min(i * 0.06, 0.36)} style={{ breakInside: 'avoid', marginBottom: 18 }}>
+                <div className="gallery-item" style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
+                  <img src={g.src} alt="" loading="lazy" className="gallery-item-img" style={{ width: '100%', display: 'block', height: i % 3 === 0 ? 420 : i % 3 === 1 ? 300 : 360, objectFit: 'cover', transition: 'transform .7s ease' }} />
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        
+{/* CTA BANNER */}
+        <section style={{ position: 'relative', height: '55vh', minHeight: 360, overflow: 'hidden', borderBottom: `2px solid ${GOLD}` }}>
+          {data.projects[2]?.heroImage || data.projects[0]?.heroImage
+            ? <img src={data.projects[2]?.heroImage || data.projects[0]?.heroImage} alt="Interior design" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #2a2420 0%, ${DARK} 100%)` }} />
+          }
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(17,19,21,.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 56px' }}>
             <FadeIn>
               <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>— Start Your Project —</p>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,5vw,4.5rem)', fontWeight: 400, color: '#fff', lineHeight: 1.1, marginBottom: 36, maxWidth: 700 }}>
@@ -477,29 +589,45 @@ export default function HomeClient({ data }: { data: HomeData }) {
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer style={{ background: DARK, color: '#f0ebe3', padding: '80px 72px 48px' }}>
-          <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 64 }}>
+        
+{/* FOOTER */}
+        <footer style={{ background: DARK, color: '#f0ebe3', padding: '64px 72px 28px', borderTop: `2px solid ${GOLD}` }}>
+          <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 48, marginBottom: 44, alignItems: 'start' }}>
             <div>
-              <Logo onDark />
-              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.35)', lineHeight: 1.9, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
-            </div>
-            {[
-              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
-              { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045'], ['#', 'Mon–Sat · 9am–6pm']] as [string, string][] },
-              { t: 'Connect', items: [['mailto:info@prospectiveinteriors.com', 'info@prospectiveinteriors.com'], ['tel:+919876543210', '+91 98765 43210']] as [string, string][] },
-            ].map(col => (
-              <div key={col.t}>
-                <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.28)', marginBottom: 20, fontWeight: 700 }}>{col.t}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {col.items.map(([href, label]) => <a key={label} href={href} className="ft-link">{label}</a>)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} />
+                <div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div>
+                  <div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
                 </div>
               </div>
-            ))}
+              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.75, maxWidth: 300 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 18, fontWeight: 700 }}>Explore</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']].map(([href, label]) => <a key={label} href={href} className="ft-link">{label}</a>)}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 18, fontWeight: 700 }}>Connect</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                <a href="mailto:info@prospectiveinteriors.com" className="ft-link">info@prospectiveinteriors.com</a>
+                <a href="tel:+919876543210" className="ft-link">+91 98765 43210</a>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {['Instagram', 'Pinterest'].map(s => (
+                  <a key={s} href="#" style={{ fontSize: 10.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.5)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 16, padding: '6px 14px', textDecoration: 'none', transition: 'all .25s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = GOLD }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.18)'; e.currentTarget.style.color = 'rgba(255,255,255,.5)' }}>{s}</a>
+                ))}
+              </div>
+            </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,.22)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,.16)', letterSpacing: '.04em' }}>Designed by Prashant Bhandiya · Est. Pune 2004</span>
+
+          <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
+            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India · Est. 2004</span>
           </div>
         </footer>
 

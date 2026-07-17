@@ -119,14 +119,21 @@ export default function ContactClient() {
       <div style={{ minHeight: '100vh', background: t.bg, color: t.ink, transition: 'background .4s,color .4s' }}>
 
         {/* NAV */}
-        <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 300, height: 68, display: 'flex', alignItems: 'center', padding: '0 56px', gap: 40, background: scrolled ? (dark ? 'rgba(17,16,9,.97)' : 'rgba(247,244,239,.97)') : 'transparent', backdropFilter: scrolled ? 'blur(20px)' : 'none', borderBottom: scrolled ? `1px solid ${t.border}` : 'none', transition: 'background .4s' }}>
-          <Link href="/"><Logo onDark={!scrolled || dark} /></Link>
+        <header style={{ position: 'sticky', top: 0, zIndex: 300, background: t.bg, borderBottom: `1px solid ${t.border}`, padding: '0 56px', height: 68, display: 'flex', alignItems: 'center', gap: 40 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 1, height: 26, background: GOLD, opacity: .5 }} />
+            <div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
+              <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+            </div>
+          </Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
             {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} className="nav-a" style={{ color: scrolled ? (href === '/contact' ? GOLD : t.muted) : (href === '/contact' ? '#fff' : 'rgba(255,255,255,.65)') }}>{label}</Link>
+              <Link key={href} href={href} className="nav-a" style={{ color: href === '/contact' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
             ))}
+            <Link href="/contact" className="btn-gold" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
           </div>
-        </nav>
+        </header>
 
         {/* HERO */}
         <section style={{ position: 'relative', height: '48vh', minHeight: 340, overflow: 'hidden', background: DARK }}>
@@ -258,7 +265,7 @@ export default function ContactClient() {
         {/* FOOTER */}
         <footer style={{ background: '#0a0908', color: '#f0ebe3', padding: '72px 72px 48px' }}>
           <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 56 }}>
-            <div><Logo onDark /><p style={{ fontSize: 13, color: 'rgba(255,255,255,.4)', lineHeight: 1.85, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004. Led by Principal Designer Prashant Bhandiya.</p></div>
+            <div><div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}><div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} /><div><div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div><div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div></div></div><p style={{ fontSize: 13, color: 'rgba(255,255,255,.4)', lineHeight: 1.85, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004. Led by Principal Designer Prashant Bhandiya.</p></div>
             {[
               { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
               { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045'], ['#', 'Mon–Sat · 9am–6pm']] as [string, string][] },
