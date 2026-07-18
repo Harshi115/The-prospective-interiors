@@ -164,11 +164,25 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,12,10,.35) 0%, rgba(15,12,10,.55) 60%, rgba(15,12,10,.88) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 60px' }}>
             <p style={{ fontSize: 11, letterSpacing: '.24em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600, textShadow: '0 2px 8px rgba(0,0,0,.5)' }}>— Our Portfolio —</p>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,5.4rem)', fontWeight: 400, color: '#fff', lineHeight: 1.05, textShadow: '0 2px 24px rgba(0,0,0,.6)', maxWidth: 760 }}>
-              {projects.length > 0 ? `${projects.length} Projects · 8 Sectors` : 'Our Work'}
+              A Portfolio Shaped by <em style={{ fontStyle: 'italic', color: GOLD }}>Craft & Light</em>
             </h1>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,.72)', marginTop: 18, maxWidth: 480, fontWeight: 300, lineHeight: 1.7 }}>
               A curated collection of interiors shaped by craft, light, and intent.
             </p>
+            <div style={{ display: 'flex', gap: 36, marginTop: 32 }}>
+              {[
+                [projects.length || 0, 'Projects'],
+                [SECTORS.length - 1, 'Sectors'],
+              ].map(([num, label], i) => (
+                <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
+                  {i > 0 && <div style={{ width: 1, height: 34, background: 'rgba(255,255,255,.2)' }} />}
+                  <div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.2rem', color: '#fff', lineHeight: 1, fontWeight: 500 }}>{num}</div>
+                    <div style={{ fontSize: 10.5, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD, marginTop: 6, fontWeight: 700 }}>{label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -239,28 +253,43 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
         </section>
 
         {/* FOOTER */}
-        <footer style={{ background: DARK, color: '#f0ebe3', padding: '80px 72px 48px' }}>
-          <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 64 }}>
+        <footer style={{ background: DARK, color: '#f0ebe3', padding: '64px 72px 28px', borderTop: `2px solid ${GOLD}` }}>
+          <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 48, marginBottom: 44, alignItems: 'start' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}><div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} /><div><div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div><div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div></div></div>
-              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.35)', lineHeight: 1.9, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
-            </div>
-            {[
-              { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
-              { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045'], ['#', 'Mon–Sat · 9am–6pm']] as [string, string][] },
-              { t: 'Connect', items: [['mailto:info@prospectiveinteriors.com', 'info@prospectiveinteriors.com'], ['tel:+919876543210', '+91 98765 43210']] as [string, string][] },
-            ].map(col => (
-              <div key={col.t}>
-                <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.28)', marginBottom: 20, fontWeight: 700 }}>{col.t}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {col.items.map(([href, label]) => <a key={label} href={href} className="ft-link">{label}</a>)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} />
+                <div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div>
+                  <div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
                 </div>
               </div>
-            ))}
+              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.75, maxWidth: 300 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 18, fontWeight: 700 }}>Explore</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']].map(([href, label]) => <a key={label} href={href} className="ft-link">{label}</a>)}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 18, fontWeight: 700 }}>Connect</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                <a href="mailto:info@prospectiveinteriors.com" className="ft-link">info@prospectiveinteriors.com</a>
+                <a href="tel:+919876543210" className="ft-link">+91 98765 43210</a>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {['Instagram', 'Pinterest'].map(s => (
+                  <a key={s} href="#" style={{ fontSize: 10.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.5)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 16, padding: '6px 14px', textDecoration: 'none', transition: 'all .25s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = GOLD }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.18)'; e.currentTarget.style.color = 'rgba(255,255,255,.5)' }}>{s}</a>
+                ))}
+              </div>
+            </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,.22)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,.16)', letterSpacing: '.04em' }}>Designed by Prashant Bhandiya · Est. Pune 2004</span>
+
+          <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
+            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India · Est. 2004</span>
           </div>
         </footer>
       </div>

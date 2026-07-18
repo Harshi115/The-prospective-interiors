@@ -17,6 +17,7 @@ const FALLBACK_DATA = {
   services: [] as { id: string; title: string; description: string }[],
   team: [] as { id: string; name: string; role: string; bio: string; photo: string }[],
   projects: [] as { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }[],
+  gallery: [] as { src: string }[],
 }
 
 export default async function HomePage() {
@@ -25,7 +26,7 @@ export default async function HomePage() {
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
   try {
-    const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes] = await Promise.all([
+    const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes, galleryRes] = await Promise.all([
       fetch(`${STRAPI}/api/pages?pagination[limit]=1`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
@@ -34,6 +35,8 @@ export default async function HomePage() {
       fetch(`${STRAPI}/api/projects?pagination[limit]=10&populate=heroImage`, { headers, next: { revalidate: 60 } }),
       // Still fetch featured ones separately for the "Featured Work" section further down the page.
       fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&pagination[limit]=3&populate=heroImage`, { headers, next: { revalidate: 60 } }),
+      // Gallery images collection (managed separately in Strapi).
+      fetch(`${STRAPI}/api/galleries?populate=*`, { headers, next: { revalidate: 60 } }),
     ])
 
     const pagesJson    = pagesRes.ok    ? await pagesRes.json()    : { data: [] }
@@ -42,6 +45,7 @@ export default async function HomePage() {
     const teamJson     = teamRes.ok     ? await teamRes.json()     : { data: [] }
     const allProjectsJson = allProjectsRes.ok ? await allProjectsRes.json() : { data: [] }
     const featuredJson    = featuredRes.ok    ? await featuredRes.json()    : { data: [] }
+    const galleryJson     = galleryRes.ok     ? await galleryRes.json()     : { data: [] }
 
     // Strapi v5 — data directly on object, no .attributes needed
     const page = pagesJson?.data?.[0] ?? {}
@@ -99,6 +103,10 @@ export default async function HomePage() {
       })),
 
       projects,
+
+      gallery: (galleryJson?.data ?? []).map((g: any) => ({
+        src: getImgUrl(g.image),
+      })).filter((g: { src: string }) => g.src),
     }
 
     return <HomeClient data={data} />
