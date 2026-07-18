@@ -399,28 +399,6 @@ export default function HomeClient({ data }: { data: HomeData }) {
         </section>
 
         
-{/* SERVICES */}
-        {data.services.length > 0 && (
-          <section className="pad" style={{ padding: '96px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
-            <FadeIn>
-              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600, textAlign: 'center' }}>— What We Do —</p>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 56, textAlign: 'center' }}>Our Services</h2>
-            </FadeIn>
-            <div className="services-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 1200, margin: '0 auto' }}>
-              {data.services.map((s: any, i: number) => (
-                <FadeIn key={s.id} delay={Math.min(i * 0.08, 0.4)}>
-                  <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: '36px 30px', height: '100%' }}>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: GOLD, marginBottom: 18, fontWeight: 400 }}>{String(i + 1).padStart(2, '0')}</div>
-                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.4rem', fontWeight: 500, color: t.ink, marginBottom: 12, lineHeight: 1.25 }}>{s.title}</h3>
-                    <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.75 }}>{s.description}</p>
-                  </div>
-                </FadeIn>
-              ))}
-            </div>
-          </section>
-        )}
-
-        
 {/* FEATURED PROJECTS */}
         {data.projects.length > 0 && (
           <section className="pad" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}` }}>
