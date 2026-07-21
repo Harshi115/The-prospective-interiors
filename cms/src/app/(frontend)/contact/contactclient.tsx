@@ -47,6 +47,7 @@ export default function ContactClient() {
   const dark = false
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', phone: '', projectType: '', message: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [err, setErr] = useState('')
@@ -108,6 +109,18 @@ export default function ContactClient() {
         @keyframes iconSpin{from{opacity:0;transform:rotate(-90deg) scale(.5)}to{opacity:1;transform:rotate(0) scale(1)}}
         .theme-btn:hover{transform:scale(1.08);border-color:${GOLD}!important}
         .nav-a{font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .25s;text-decoration:none}.nav-a:hover{color:${GOLD}!important}
+        .hamburger-btn{display:none}
+        .header-cta{display:inline-flex}
+        .mobile-menu{display:none}
+        @media(max-width:860px){
+          header{padding:0 20px!important}
+          .nav-links{display:none!important}
+          .header-cta{display:none!important}
+          .hamburger-btn{display:flex!important}
+          .mobile-menu.open{display:flex!important}
+        }
+        .mobile-menu{position:fixed;top:68px;left:0;right:0;bottom:0;background:${t.bg};z-index:299;flex-direction:column;padding:32px 24px;gap:4px;overflow-y:auto}
+        .mobile-menu a{padding:16px 4px;font-size:16px;font-weight:500;text-decoration:none;border-bottom:1px solid ${t.border}}
         .img-hover{overflow:hidden;border-radius:10px}.img-hover img{transition:transform .8s ease;width:100%;height:100%;object-fit:cover;display:block}.img-hover:hover img{transform:scale(1.05)}
         .hero-chip:hover{border-color:${GOLD}!important;background:rgba(216,195,165,.16)!important}
         .btn-gold{display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;background:${GOLD};color:${DARK};padding:13px 32px;border-radius:6px;border:1px solid ${GOLD};cursor:pointer;transition:opacity .25s,transform .22s,background .25s;text-decoration:none;letter-spacing:.03em}.btn-gold:hover{background:${GOLD_HOVER};border-color:${GOLD_HOVER};transform:translateY(-2px)}
@@ -133,12 +146,32 @@ export default function ContactClient() {
             </div>
           </Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
-            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} className="nav-a" style={{ color: href === '/contact' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
-            ))}
-            <Link href="/contact" className="btn-gold" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
+            <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+              {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
+                <Link key={href} href={href} className="nav-a" style={{ color: href === '/contact' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
+              ))}
+            </div>
+            <Link href="/contact" className="btn-gold header-cta" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
           </div>
+
+          <button
+            className="hamburger-btn"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            aria-label="Toggle menu"
+            style={{ marginLeft: 'auto', width: 32, height: 32, background: 'none', border: 'none', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, cursor: 'pointer', padding: 0 }}
+          >
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, transition: 'transform .25s', transform: mobileMenuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, opacity: mobileMenuOpen ? 0 : 1, transition: 'opacity .25s' }} />
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, transition: 'transform .25s', transform: mobileMenuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+          </button>
         </header>
+
+        <nav className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
+          {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} style={{ color: href === '/contact' ? GOLD : t.ink }}>{label}</Link>
+          ))}
+          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="btn-gold" style={{ marginTop: 16, textAlign: 'center', padding: '14px 20px', fontSize: 13 }}>Get in Touch</Link>
+        </nav>
 
         {/* HERO */}
         <section style={{ position: 'relative', height: '48vh', minHeight: 340, overflow: 'hidden', background: DARK }}>

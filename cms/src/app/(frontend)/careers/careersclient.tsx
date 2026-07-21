@@ -56,6 +56,7 @@ export default function CareerClient() {
   const dark = false
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openings, setOpenings] = useState(FALLBACK_OPENINGS)
   const [values, setValues] = useState(FALLBACK_VALUES)
   const [selected, setSelected] = useState<typeof FALLBACK_OPENINGS[0] | null>(null)
@@ -171,6 +172,18 @@ export default function CareerClient() {
         .btn-outline:hover{border-color:${GOLD};background:rgba(216,195,165,.10)}
         @keyframes scrollLine{0%{transform:translateY(-100%)}100%{transform:translateY(260%)}}
         .nav-a{font-size:13px;font-weight:500;letter-spacing:.04em;transition:color .25s;text-decoration:none}.nav-a:hover{color:${GOLD}!important}
+        .hamburger-btn{display:none}
+        .header-cta{display:inline-flex}
+        .mobile-menu{display:none}
+        @media(max-width:860px){
+          header{padding:0 20px!important}
+          .nav-links{display:none!important}
+          .header-cta{display:none!important}
+          .hamburger-btn{display:flex!important}
+          .mobile-menu.open{display:flex!important}
+        }
+        .mobile-menu{position:fixed;top:68px;left:0;right:0;bottom:0;background:${t.bg};z-index:299;flex-direction:column;padding:32px 24px;gap:4px;overflow-y:auto}
+        .mobile-menu a{padding:16px 4px;font-size:16px;font-weight:500;text-decoration:none;border-bottom:1px solid ${t.border}}
         .tog{width:44px;height:24px;border-radius:12px;cursor:pointer;position:relative;display:flex;align-items:center;padding:3px;transition:background .3s;border:1.5px solid;flex-shrink:0}
         .tok-k{width:16px;height:16px;border-radius:8px;transition:transform .3s}
         ::placeholder{color:#c5b8a8;font-size:14px}
@@ -201,12 +214,32 @@ export default function CareerClient() {
             </div>
           </Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
-            {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} className="nav-a" style={{ color: href === '/careers' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
-            ))}
-            <Link href="/contact" className="btn-gold" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
+            <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+              {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
+                <Link key={href} href={href} className="nav-a" style={{ color: href === '/careers' ? GOLD : t.muted, fontSize: 13 }}>{label}</Link>
+              ))}
+            </div>
+            <Link href="/contact" className="btn-gold header-cta" style={{ padding: '8px 20px', fontSize: 11.5 }}>Get in Touch</Link>
           </div>
+
+          <button
+            className="hamburger-btn"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            aria-label="Toggle menu"
+            style={{ marginLeft: 'auto', width: 32, height: 32, background: 'none', border: 'none', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, cursor: 'pointer', padding: 0 }}
+          >
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, transition: 'transform .25s', transform: mobileMenuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, opacity: mobileMenuOpen ? 0 : 1, transition: 'opacity .25s' }} />
+            <span style={{ display: 'block', width: 22, height: 2, background: t.ink, transition: 'transform .25s', transform: mobileMenuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+          </button>
         </header>
+
+        <nav className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
+          {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} style={{ color: href === '/careers' ? GOLD : t.ink }}>{label}</Link>
+          ))}
+          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="btn-gold" style={{ marginTop: 16, textAlign: 'center', padding: '14px 20px', fontSize: 13 }}>Get in Touch</Link>
+        </nav>
 
         {/* HERO */}
         <section style={{ position: 'relative', height: '85vh', minHeight: 560, overflow: 'hidden' }}>
