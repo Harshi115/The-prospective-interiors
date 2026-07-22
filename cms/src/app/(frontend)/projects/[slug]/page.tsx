@@ -3,12 +3,13 @@ import ProjectDetailClient from './ProjectDetailClient'
 
 export const dynamic = 'force-dynamic'
 
-const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+const STRAPI = process.env.STRAPI_INTERNAL_URL || process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+const STRAPI_PUBLIC = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
 const getImgUrl = (media: any) => {
   if (!media) return ''
   const url = media?.url ?? ''
-  return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+  return url.startsWith('http') ? url : url ? `${STRAPI_PUBLIC}${url}` : ''
 }
 
 // Strapi's Rich Text (Blocks) field returns a structured JSON array, not a plain
@@ -78,7 +79,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       gallery: (raw.gallery ?? [])
         .map((img: any) => {
           const url = img?.url ?? ''
-          return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+          return url.startsWith('http') ? url : url ? `${STRAPI_PUBLIC}${url}` : ''
         })
         .filter(Boolean),
     }

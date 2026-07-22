@@ -30,7 +30,8 @@ services:
     container_name: tpi-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_STRAPI_URL: http://strapi:1337
+      STRAPI_INTERNAL_URL: http://strapi:1337
+      NEXT_PUBLIC_STRAPI_URL: http://localhost:1337
     ports:
       - '3000:3000'
     depends_on:

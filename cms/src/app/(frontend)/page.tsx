@@ -6,6 +6,7 @@ export const metadata = {
 }
 
 export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 const FALLBACK_DATA = {
   heroHeadline: 'Designing Spaces That Shape The Future',
@@ -21,7 +22,10 @@ const FALLBACK_DATA = {
 }
 
 export default async function HomePage() {
-  const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  // STRAPI = internal Docker network address, used for server-side fetches (container-to-container).
+  // STRAPI_PUBLIC = browser-facing address, used when building <img> src URLs so the browser can load them.
+  const STRAPI = process.env.STRAPI_INTERNAL_URL || process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  const STRAPI_PUBLIC = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
   const TOKEN  = process.env.STRAPI_API_TOKEN || ''
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
@@ -51,9 +55,9 @@ export default async function HomePage() {
     const page = pagesJson?.data?.[0] ?? {}
 
     const getImgUrl = (media: any) => {
-      // Strapi v5 image format
+      // Strapi v5 image format — uses STRAPI_PUBLIC so the browser can actually load the image.
       const url = media?.url ?? media?.data?.attributes?.url ?? ''
-      return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+      return url.startsWith('http') ? url : url ? `${STRAPI_PUBLIC}${url}` : ''
     }
 
     const mapProject = (p: any) => ({
@@ -117,4 +121,5 @@ export default async function HomePage() {
     console.error('Home page error (using fallback data):', error)
     return <HomeClient data={FALLBACK_DATA} />
   }
+
 }

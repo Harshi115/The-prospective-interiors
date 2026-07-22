@@ -45,28 +45,6 @@ export default function ProjectDetailClient({ project: initialProject, related }
   useEffect(() => {
     setMounted(true)
     // Always start in the premium dark theme regardless of any previously saved preference.
-
-    // Refetch with gallery
-    fetch(`${STRAPI}/api/projects?filters[slug][$eq]=${initialProject.slug}&populate[heroImage]=true&populate[gallery]=true`)
-      .then(r => r.json())
-      .then(json => {
-        const raw = json?.data?.[0]
-        if (!raw) return
-        const getImgUrl = (media: any) => {
-          if (!media) return ''
-          const url = media?.url ?? ''
-          return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
-        }
-        setProject({
-          ...project,
-          heroImage: getImgUrl(raw.heroImage),
-          gallery: (raw.gallery ?? []).map((img: any) => {
-            const url = img?.url ?? ''
-            return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
-          }).filter(Boolean),
-        })
-      })
-      .catch(() => {})
   }, [])
 
   useEffect(() => { const fn = () => setScrolled(window.scrollY > 60); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn) }, [])
