@@ -2,68 +2,103 @@ import AboutClient from './AboutClient'
 
 export const metadata = {
   title: 'About — The Prospective Interiors',
-  description: 'Learn about The Prospective Interiors — a Pune-based interior design firm established in 2004.',
 }
 
+export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
+async function fetchList(STRAPI: string, headers: any, endpoint: string) {
+  try {
+    const res = await fetch(`${STRAPI}/api/${endpoint}?sort=order:asc&pagination[limit]=100`, {
+      headers,
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return []
+    const json = await res.json()
+    return json?.data ?? []
+  } catch {
+    return []
+  }
+}
+
 export default async function AboutPage() {
-  const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  const STRAPI = process.env.STRAPI_INTERNAL_URL || process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  const STRAPI_PUBLIC = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
+  const TOKEN = process.env.STRAPI_API_TOKEN || ''
+  const headers = { Authorization: `Bearer ${TOKEN}` }
+
+  const getImgUrl = (media: any) => {
+    const url = media?.url ?? media?.data?.attributes?.url ?? ''
+    return url.startsWith('http') ? url : url ? `${STRAPI_PUBLIC}${url}` : ''
+  }
+
+  let pageContent: Record<string, any> = {
+    heroHeading: '',
+    heroSubHeading: '',
+    heroImage: '',
+    storyLabel: '',
+    storyHeading: '',
+    storyPara1: '',
+    storyPara2: '',
+    storyPara3: '',
+    storyImage: '',
+    philosophyImage: '',
+    philosophyLabel: '',
+    philosophyQuote: '',
+    philosophyAttribution: '',
+    valuesLabel: '',
+    servicesLabel: '',
+    faqLabel: '',
+    galleryImage1: '',
+    galleryImage2: '',
+    galleryImage3: '',
+    galleryImage4: '',
+    ctaImage: '',
+    ctaHeading: '',
+  }
 
   try {
-    const [servicesRes, teamRes, statsRes, valuesRes] = await Promise.all([
-      fetch(`${STRAPI}/api/services?sort=order:asc`, { cache: 'no-store' }),
-      fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { cache: 'no-store' }),
-      fetch(`${STRAPI}/api/stats?sort=order:asc`, { cache: 'no-store' }),
-      fetch(`${STRAPI}/api/values?sort=order:asc`, { cache: 'no-store' }),
-    ])
-
-    const getImgUrl = (media: any) => {
-      if (!media) return ''
-      const url = media?.url ?? ''
-      return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
+    const res = await fetch(`${STRAPI}/api/aboutpages?populate[0]=storyImage&populate[1]=philosophyImage&populate[2]=heroimage&populate[3]=gallery&populate[4]=ctaImage`, { headers, next: { revalidate: 60 } })
+    if (res.ok) {
+      const json = await res.json()
+      const data = json?.data?.[0] ?? {}
+      const galleryArr = Array.isArray(data.gallery) ? data.gallery : (data.gallery ? [data.gallery] : [])
+      const storyImg = Array.isArray(data.storyImage) ? data.storyImage[0] : data.storyImage
+      const ctaImg = Array.isArray(data.ctaImage) ? data.ctaImage[0] : data.ctaImage
+      pageContent = {
+        ...pageContent,
+        ...data,
+        storyImage: getImgUrl(storyImg) || '',
+        philosophyImage: getImgUrl(data.philosophyImage) || '',
+        heroImage: getImgUrl(data.heroimage) || '',
+        heroSubHeading: data.herosubHeading ?? '',
+        galleryImage1: getImgUrl(galleryArr[0]) || '',
+        galleryImage2: getImgUrl(galleryArr[1]) || '',
+        galleryImage3: getImgUrl(galleryArr[2]) || '',
+        galleryImage4: getImgUrl(galleryArr[3]) || '',
+        ctaImage: getImgUrl(ctaImg) || '',
+        ctaHeading: data.ctaheading ?? '',
+      }
     }
-
-    const servicesJson = servicesRes.ok ? await servicesRes.json() : { data: [] }
-    const teamJson = teamRes.ok ? await teamRes.json() : { data: [] }
-    const statsJson = statsRes.ok ? await statsRes.json() : { data: [] }
-    const valuesJson = valuesRes.ok ? await valuesRes.json() : { data: [] }
-
-    // Debug logging — check your terminal after loading /about. Remove once confirmed working.
-    console.log('VALUES API status:', valuesRes.status, valuesRes.ok)
-    console.log('VALUES raw response:', JSON.stringify(valuesJson))
-
-    const services = (servicesJson?.data ?? []).map((s: any) => ({
-      id: String(s.id),
-      title: s.title ?? '',
-      description: s.description ?? '',
-    }))
-
-    const team = (teamJson?.data ?? []).map((m: any) => ({
-      id: String(m.id),
-      name: m.name ?? '',
-      role: m.role ?? '',
-      bio: m.bio ?? '',
-      photo: getImgUrl(m.photo),
-    }))
-
-    const stats = (statsJson?.data ?? []).map((s: any) => ({
-      label: s.label ?? '',
-      value: s.value ?? '',
-    }))
-
-    const values = (valuesJson?.data ?? []).map((v: any) => ({
-      id: String(v.id),
-      title: v.title ?? '',
-      description: v.description ?? '',
-      order: v.order ?? 0,
-    }))
-
-    console.log('VALUES mapped for component:', values)
-
-    return <AboutClient services={services} team={team} stats={stats} values={values} />
   } catch (error) {
-    console.error('About page error:', error)
-    return <AboutClient services={[]} team={[]} stats={[]} values={[]} />
+    console.error('About page content fetch error (using fallback text):', error)
   }
+
+  const [services, values, faqs, stats] = await Promise.all([
+    fetchList(STRAPI, headers, 'services'),
+    fetchList(STRAPI, headers, 'values'), // ⚠️ check your actual collection's API ID in Strapi and rename if different
+    fetchList(STRAPI, headers, 'faqs'),
+    fetchList(STRAPI, headers, 'stats'),
+  ])
+
+  return (
+    <AboutClient
+      pageContent={pageContent}
+      services={services.map((s: any) => ({ id: String(s.id), title: s.title, description: s.description }))}
+      values={values.map((v: any) => ({ id: String(v.id), title: v.title, description: v.description }))}
+      faqs={faqs.map((f: any) => ({ id: String(f.id), q: f.question, a: f.answer }))}
+      team={[]}
+      stats={stats.map((s: any) => ({ label: s.label ?? '', value: s.value ?? '' }))}
+    />
+  )
 }

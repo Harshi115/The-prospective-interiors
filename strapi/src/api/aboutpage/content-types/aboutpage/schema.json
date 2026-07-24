@@ -1,0 +1,101 @@
+{
+  "kind": "collectionType",
+  "collectionName": "aboutpages",
+  "info": {
+    "singularName": "aboutpage",
+    "pluralName": "aboutpages",
+    "displayName": "aboutpage"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "herosubHeading": {
+      "type": "text"
+    },
+    "storyLabel": {
+      "type": "string"
+    },
+    "storyHeading": {
+      "type": "string"
+    },
+    "storyPara1": {
+      "type": "text"
+    },
+    "storyPara2": {
+      "type": "text"
+    },
+    "philosophyLabel": {
+      "type": "string"
+    },
+    "philosophyQuote": {
+      "type": "text"
+    },
+    "philosophyAttribution": {
+      "type": "string"
+    },
+    "faqLabel": {
+      "type": "string"
+    },
+    "gallery": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "storyPara3": {
+      "type": "text"
+    },
+    "storyImage": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "philosophyImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "heroimage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "ctaImage": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "ctaheading": {
+      "type": "string"
+    },
+    "heroHeading": {
+      "type": "string"
+    }
+  }
+}

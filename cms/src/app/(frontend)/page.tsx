@@ -8,10 +8,23 @@ export const metadata = {
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
+// Empty defaults only used if Strapi is completely unreachable — everything
+// on the page is meant to come from the CMS, nothing is hardcoded here.
 const FALLBACK_DATA = {
-  heroHeadline: 'Designing Spaces That Shape The Future',
-  heroSubtext: 'A 20-year legacy of transforming spaces across hospitality, healthcare, retail, residential and industrial sectors.',
-  philosophyText: 'Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs.',
+  heroTagline: '',
+  heroHeadline: '',
+  heroSubtext: '',
+  philosophyText: '',
+  ctaLabel: '',
+  ctaHeading: '',
+  ctaImage: '',
+  testimonialImage: '',
+  testimonialQuote: '',
+  testimonialAuthor: '',
+  journeyLabel: '',
+  journeyHeading: '',
+  journeySubtext: '',
+  journeySteps: [] as { step: string; desc: string }[],
   heroImage: '',
   heroImages: [] as string[],
   stats: [] as { label: string; value: string }[],
@@ -30,8 +43,8 @@ export default async function HomePage() {
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
   try {
-    const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes, galleryRes] = await Promise.all([
-      fetch(`${STRAPI}/api/pages?pagination[limit]=1`, { headers, next: { revalidate: 60 } }),
+    const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes, galleryRes, journeyRes] = await Promise.all([
+      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[0]=testimonialImage&populate[1]=ctaimage&populate[2]=heroImages`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
@@ -41,6 +54,8 @@ export default async function HomePage() {
       fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&pagination[limit]=3&populate=heroImage`, { headers, next: { revalidate: 60 } }),
       // Gallery images collection (managed separately in Strapi).
       fetch(`${STRAPI}/api/galleries?populate=*`, { headers, next: { revalidate: 60 } }),
+      // Design journey steps (5 cards under "Our Design Journey").
+      fetch(`${STRAPI}/api/journey-steps?sort=order:asc`, { headers, next: { revalidate: 60 } }),
     ])
 
     const pagesJson    = pagesRes.ok    ? await pagesRes.json()    : { data: [] }
@@ -50,6 +65,7 @@ export default async function HomePage() {
     const allProjectsJson = allProjectsRes.ok ? await allProjectsRes.json() : { data: [] }
     const featuredJson    = featuredRes.ok    ? await featuredRes.json()    : { data: [] }
     const galleryJson     = galleryRes.ok     ? await galleryRes.json()     : { data: [] }
+    const journeyJson     = journeyRes.ok     ? await journeyRes.json()     : { data: [] }
 
     // Strapi v5 — data directly on object, no .attributes needed
     const page = pagesJson?.data?.[0] ?? {}
@@ -80,10 +96,28 @@ export default async function HomePage() {
     // Hero slideshow — every project's photo, no caption/link shown (just clean images).
     const heroImages = allProjects.map((p: ReturnType<typeof mapProject>) => p.heroImage).filter(Boolean)
 
+    // Everything below reads straight from Strapi with '' as the only fallback —
+    // if a field is empty in the CMS, it will render empty on the page (no hardcoded text).
     const data = {
-      heroHeadline:   page.heroHeadline   ?? FALLBACK_DATA.heroHeadline,
-      heroSubtext:    page.heroSubtext    ?? FALLBACK_DATA.heroSubtext,
-      philosophyText: page.philosophyText ?? FALLBACK_DATA.philosophyText,
+      heroTagline:    page.heroTagline    ?? '',
+      heroHeadline:   page.heroHeadline   ?? '',
+      heroSubtext:    page.heroSubtext    ?? '',
+      philosophyText: page.philosophyText ?? '',
+      ctaLabel:       page.ctalabel       ?? '',
+      ctaHeading:     page.ctaHeading     ?? '',
+      ctaImage:       getImgUrl(page.ctaimage),
+
+      testimonialImage:  getImgUrl(page.testimonialImage),
+      testimonialQuote:  page.testimonialQuote  ?? '',
+      testimonialAuthor: page.testimonialAuthor ?? '',
+
+      journeyLabel:    page.journeyLabel    ?? '',
+      journeyHeading:  page.journeyHeading  ?? '',
+      journeySubtext:  page.journeySubtext  ?? '',
+      journeySteps: (journeyJson?.data ?? []).map((j: any) => ({
+        step: j.step ?? j.title ?? '',
+        desc: j.description ?? j.desc ?? '',
+      })),
       heroImage:      heroImages[0] ?? '',
       heroImages,
 
@@ -115,11 +149,9 @@ export default async function HomePage() {
 
     return <HomeClient data={data} />
   } catch (error) {
-    // If Strapi is temporarily unreachable during build (e.g. cold-starting on
-    // a free tier), fall back to safe defaults instead of failing the whole build.
-    // ISR will pick up real data automatically once Strapi responds again.
-    console.error('Home page error (using fallback data):', error)
+    // If Strapi is completely unreachable (e.g. cold-starting on a free tier),
+    // render with empty fields rather than crashing the whole build.
+    console.error('Home page error (Strapi unreachable, rendering empty):', error)
     return <HomeClient data={FALLBACK_DATA} />
   }
-
 }

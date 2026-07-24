@@ -1,20 +1,17 @@
 {
   "kind": "collectionType",
-  "collectionName": "career_values",
+  "collectionName": "journey_steps",
   "info": {
-    "singularName": "career-value",
-    "pluralName": "career-values",
-    "displayName": "Career Value"
+    "singularName": "journey-step",
+    "pluralName": "journey-steps",
+    "displayName": "Journey Step"
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "icon": {
-      "type": "string"
-    },
-    "title": {
+    "step": {
       "type": "string"
     },
     "description": {
@@ -22,9 +19,6 @@
     },
     "order": {
       "type": "integer"
-    },
-    "sectorsList": {
-      "type": "text"
     }
   }
 }

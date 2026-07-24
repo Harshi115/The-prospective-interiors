@@ -13,7 +13,6 @@ const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
 interface Project { id:string;title:string;slug:string;client:string;location:string;year:number|null;sector:string;featured:boolean;description:string;heroImage:string;gallery:string[];area:string }
 
-const SECTORS = ['All','Hospitality','Healthcare','Retail','Residential','Industrial','Commercial','Civic','Educational']
 const PER = 9
 
 function Logo({ onDark = false }: { onDark?: boolean }) {
@@ -42,7 +41,11 @@ function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode
   return <div ref={ref} style={{ opacity: vis ? 1 : 0, transform: vis ? 'none' : 'translateY(24px)', transition: `opacity .8s ease ${delay}s, transform .8s ease ${delay}s`, ...style }}>{children}</div>
 }
 
-export default function ProjectsClient({ projects: initialProjects }: { projects: Project[] }) {
+export default function ProjectsClient({ projects: initialProjects, pageContent }: { projects: Project[]; pageContent?: { portfolioLabel?: string; portfolioHeading?: string; portfolioSubtext?: string; sectorsList?: string[] } }) {
+  const portfolioLabel = pageContent?.portfolioLabel
+  const portfolioHeading = pageContent?.portfolioHeading
+  const portfolioSubtext = pageContent?.portfolioSubtext
+  const SECTORS = ['All', ...(pageContent?.sectorsList ?? [])]
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const dark = false
   const [mounted, setMounted] = useState(false)
@@ -57,7 +60,7 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
     setMounted(true)
     // Always start in the premium dark theme regardless of any previously saved preference.
 
-    fetch(`${STRAPI}/api/projects?populate[heroImage]=true&populate[gallery]=true&pagination[limit]=100`)
+    fetch(`${STRAPI}/api/projects?populate[heroImage]=true&populate[gallery]=true&pagination[limit]=100`, { cache: 'no-store' })
       .then(r => r.json())
       .then(json => {
         const getImgUrl = (media: any) => {
@@ -195,12 +198,12 @@ export default function ProjectsClient({ projects: initialProjects }: { projects
             : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${DARK}, #2a2318)` }} />
           }
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,12,10,.35) 0%, rgba(15,12,10,.55) 60%, rgba(15,12,10,.88) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 60px' }}>
-            <p style={{ fontSize: 11, letterSpacing: '.24em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600, textShadow: '0 2px 8px rgba(0,0,0,.5)' }}>— Our Portfolio —</p>
+            <p style={{ fontSize: 11, letterSpacing: '.24em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600, textShadow: '0 2px 8px rgba(0,0,0,.5)' }}>{portfolioLabel}</p>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,5.4rem)', fontWeight: 400, color: '#fff', lineHeight: 1.05, textShadow: '0 2px 24px rgba(0,0,0,.6)', maxWidth: 760 }}>
-              A Portfolio Shaped by <em style={{ fontStyle: 'italic', color: GOLD }}>Craft & Light</em>
+              {portfolioHeading}
             </h1>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,.72)', marginTop: 18, maxWidth: 480, fontWeight: 300, lineHeight: 1.7 }}>
-              A curated collection of interiors shaped by craft, light, and intent.
+              {portfolioSubtext}
             </p>
             <div style={{ display: 'flex', gap: 36, marginTop: 32 }}>
               {[

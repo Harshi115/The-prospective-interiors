@@ -83,7 +83,43 @@ function CountUp({ value, visible }: { value: string; visible: boolean }) {
   return <>{d}</>
 }
 
-export default function AboutClient({ services, team, stats, values }: { services: Service[]; team: Member[]; stats: Stat[]; values: Value[] }) {
+interface AboutPageContent {
+  heroHeading?: string
+  heroSubHeading?: string
+  heroImage?: string
+  storyLabel?: string
+  storyHeading?: string
+  storyPara1?: string
+  storyPara2?: string
+  storyPara3?: string
+  storyImage?: string
+  philosophyLabel?: string
+  philosophyQuote?: string
+  philosophyAttribution?: string
+  philosophyImage?: string
+  valuesLabel?: string
+  servicesLabel?: string
+  faqLabel?: string
+  galleryImage1?: string
+  galleryImage2?: string
+  galleryImage3?: string
+  galleryImage4?: string
+  ctaImage?: string
+  ctaHeading?: string
+}
+interface Faq { id?: string; q: string; a: string }
+
+const DEFAULT_FAQS: Faq[] = [
+  { q: 'How long does a typical project take?', a: 'A residential apartment typically takes 3 to 6 months from concept to handover, while a larger commercial or hospitality project can range from 6 to 14 months. We provide a detailed timeline at the start of every engagement.' },
+  { q: 'Do you work outside Pune?', a: 'Yes — we have completed projects across Maharashtra and pan-India including Mumbai, Delhi NCR, Hyderabad, Bangalore and Ahmedabad. Our dedicated execution team handles coordination regardless of location.' },
+  { q: 'Can we see a 3D visualisation before work begins?', a: 'Yes, always. 3D visualisation is a standard deliverable in our process — you will see your space in photorealistic detail before a single wall is touched.' },
+  { q: 'What sectors do you design for?', a: 'We work across Hospitality, Industrial, Healthcare, Retail, Residential, Commercial, Civic and Educational sectors — bringing 20 years of cross-sector experience to every brief.' },
+  { q: 'What is your minimum project size?', a: 'We do not have a fixed minimum. We are happy to have an initial conversation about your brief and assess whether we are the right fit. Reach out and we will respond within 24 hours.' },
+]
+
+export default function AboutClient({ services, team, stats, values, pageContent, faqs }: { services: Service[]; team: Member[]; stats: Stat[]; values: Value[]; pageContent?: AboutPageContent; faqs?: Faq[] }) {
+  const pc = pageContent || {}
+  const faqList = faqs || []
   const dark = false
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -106,8 +142,8 @@ export default function AboutClient({ services, team, stats, values }: { service
 
   if (!mounted) return null
 
-  const svcs = services.length ? services : DSVCS
-  const sts = stats.length ? stats : DS
+  const svcs = services
+  const sts = stats
 
   const t = {
     bg: dark ? '#111315' : '#FAF7F1',
@@ -196,15 +232,15 @@ export default function AboutClient({ services, team, stats, values }: { service
 
         {/* HERO — Full screen luxury */}
         <section style={{ position: 'relative', height: '85vh', minHeight: 560, overflow: 'hidden' }}>
-          <img src={HERO_IMG} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+          {pc.heroImage && <img src={pc.heroImage} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.15) 0%, rgba(17,19,21,.35) 55%, rgba(17,19,21,.82) 100%)' }} />
           <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 100px', animation: 'fadeUp 1s ease .1s both' }}>
             <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>Est. 2004 · Pune, India</p>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,5.8rem)', fontWeight: 400, color: '#fff', lineHeight: 1.08, maxWidth: 820, marginBottom: 24, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
-              Twenty years of crafting<br /><em style={{ fontStyle: 'italic', color: GOLD }}>spaces people love.</em>
+              {pc.heroHeading}
             </h1>
             <p style={{ fontSize: 16, color: 'rgba(255,255,255,.72)', lineHeight: 1.85, maxWidth: 480, marginBottom: 44, fontWeight: 300 }}>
-              Founded by Prashant Bhandiya in 2004, The Prospective Interiors has built its reputation on honest design, transparent delivery and genuine passion for every space we touch.
+              {pc.heroSubHeading}
             </p>
             <Link href="/contact" className="btn-gold">Begin a Conversation →</Link>
           </div>
@@ -237,15 +273,15 @@ export default function AboutClient({ services, team, stats, values }: { service
           <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, maxWidth: 1160, margin: '0 auto', alignItems: 'center' }}>
             <FadeIn>
               <div className="img-hover" style={{ height: 560 }}>
-                <img src={LUXURY_IMGS[1]} alt="Luxury Interior Design" />
+                {pc.storyImage && <img src={pc.storyImage} alt="Luxury Interior Design" />}
               </div>
             </FadeIn>
             <FadeIn delay={0.15}>
-              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>— Our Story —</p>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, lineHeight: 1.15, marginBottom: 28 }}>A studio built on honesty and craft</h2>
-              <p style={{ fontSize: 15.5, color: t.muted, lineHeight: 2, marginBottom: 20 }}>In 2004, Prashant Bhandiya opened The Prospective Interiors in Pune with a single conviction — that a well-designed space has the power to change how people feel every single day.</p>
-              <p style={{ fontSize: 15, color: t.muted, lineHeight: 2, marginBottom: 20 }}>Over two decades and 200+ projects, we have designed restaurants that become destinations, hospitals that feel like sanctuaries, showrooms that drive sales, and homes that their owners never want to leave.</p>
-              <p style={{ fontSize: 15, color: t.muted, lineHeight: 2, marginBottom: 36 }}>We are small enough to give every project our full attention, and experienced enough to deliver at the highest level — always on time, always within budget.</p>
+              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>{pc.storyLabel}</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, lineHeight: 1.15, marginBottom: 28 }}>{pc.storyHeading}</h2>
+              <p style={{ fontSize: 15.5, color: t.muted, lineHeight: 2, marginBottom: 20 }}>{pc.storyPara1}</p>
+              <p style={{ fontSize: 15, color: t.muted, lineHeight: 2, marginBottom: 20 }}>{pc.storyPara2}</p>
+              <p style={{ fontSize: 15, color: t.muted, lineHeight: 2, marginBottom: 36 }}>{pc.storyPara3}</p>
               <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 2 }}>Explore Our Work →</Link>
             </FadeIn>
           </div>
@@ -255,16 +291,16 @@ export default function AboutClient({ services, team, stats, values }: { service
         <section style={{ padding: '0', overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gridTemplateRows: '300px 300px', gap: 4 }}>
             <div className="img-hover" style={{ gridRow: '1 / 3' }}>
-              <img src={LUXURY_IMGS[2]} alt="Interior" style={{ height: '100%' }} />
+              {pc.galleryImage1 && <img src={pc.galleryImage1} alt="Interior" style={{ height: '100%' }} />}
             </div>
             <div className="img-hover">
-              <img src={LUXURY_IMGS[3]} alt="Interior" style={{ height: '100%' }} />
+              {pc.galleryImage2 && <img src={pc.galleryImage2} alt="Interior" style={{ height: '100%' }} />}
             </div>
             <div className="img-hover">
-              <img src={LUXURY_IMGS[4]} alt="Interior" style={{ height: '100%' }} />
+              {pc.galleryImage3 && <img src={pc.galleryImage3} alt="Interior" style={{ height: '100%' }} />}
             </div>
             <div className="img-hover">
-              <img src={LUXURY_IMGS[5]} alt="Interior" style={{ height: '100%' }} />
+              {pc.galleryImage4 && <img src={pc.galleryImage4} alt="Interior" style={{ height: '100%' }} />}
             </div>
             <div style={{ background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32, flexDirection: 'column', gap: 12 }}>
               <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', fontWeight: 300, fontStyle: 'italic', color: '#f0ebe3', textAlign: 'center', lineHeight: 1.4 }}>200+ spaces. One standard.</p>
@@ -278,18 +314,18 @@ export default function AboutClient({ services, team, stats, values }: { service
         <section className="pad" style={{ padding: '96px 72px', background: t.subtle }}>
           <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, maxWidth: 1160, margin: '0 auto', alignItems: 'center' }}>
             <FadeIn>
-              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 600 }}>— Our Philosophy —</p>
+              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 600 }}>{pc.philosophyLabel}</p>
               <blockquote style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 300, fontStyle: 'italic', color: t.ink, lineHeight: 1.55, marginBottom: 28 }}>
-                "Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs."
+                {pc.philosophyQuote}
               </blockquote>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ width: 32, height: 2, background: GOLD }} />
-                <span style={{ fontSize: 12, color: GOLD, letterSpacing: '.06em', fontWeight: 500 }}>Prashant Bhandiya · Principal Designer</span>
+                <span style={{ fontSize: 12, color: GOLD, letterSpacing: '.06em', fontWeight: 500 }}>{pc.philosophyAttribution}</span>
               </div>
             </FadeIn>
             <FadeIn delay={0.2}>
               <div className="img-hover" style={{ height: 420, borderRadius: 10 }}>
-                <img src={IMG4} alt="Luxury Interior" />
+                {pc.philosophyImage && <img src={pc.philosophyImage} alt="Luxury Interior" />}
               </div>
             </FadeIn>
           </div>
@@ -298,7 +334,7 @@ export default function AboutClient({ services, team, stats, values }: { service
         {/* CORE VALUES */}
         <section className="pad" style={{ padding: '96px 72px', borderBottom: `1px solid ${t.border}` }}>
           <FadeIn>
-            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— The 7 Pillars —</p>
+            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>{pc.valuesLabel}</p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, marginBottom: 52, lineHeight: 1.1 }}>Our Core Values</h2>
           </FadeIn>
           <div className="val-g" style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 32, alignItems: 'start' }}
@@ -323,7 +359,7 @@ export default function AboutClient({ services, team, stats, values }: { service
         {/* SERVICES */}
         <section className="pad" style={{ padding: '96px 72px', background: t.subtle, borderBottom: `1px solid ${t.border}` }}>
           <FadeIn>
-            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— 12 Core Services —</p>
+            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>{pc.servicesLabel}</p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, marginBottom: 52, lineHeight: 1.1 }}>What We Offer</h2>
           </FadeIn>
           <div className="svc-g" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
@@ -344,16 +380,10 @@ export default function AboutClient({ services, team, stats, values }: { service
         <section className="pad" style={{ padding: '96px 72px', borderBottom: `1px solid ${t.border}` }}>
           <div style={{ maxWidth: 780, margin: '0 auto' }}>
             <FadeIn>
-              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Common Questions —</p>
+              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>{pc.faqLabel}</p>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.5vw,3rem)', fontWeight: 400, color: t.ink, marginBottom: 48, lineHeight: 1.1 }}>FAQs</h2>
             </FadeIn>
-            {[
-              { q: 'How long does a typical project take?', a: 'A residential apartment typically takes 3 to 6 months from concept to handover, while a larger commercial or hospitality project can range from 6 to 14 months. We provide a detailed timeline at the start of every engagement.' },
-              { q: 'Do you work outside Pune?', a: 'Yes — we have completed projects across Maharashtra and pan-India including Mumbai, Delhi NCR, Hyderabad, Bangalore and Ahmedabad. Our dedicated execution team handles coordination regardless of location.' },
-              { q: 'Can we see a 3D visualisation before work begins?', a: 'Yes, always. 3D visualisation is a standard deliverable in our process — you will see your space in photorealistic detail before a single wall is touched.' },
-              { q: 'What sectors do you design for?', a: 'We work across Hospitality, Industrial, Healthcare, Retail, Residential, Commercial, Civic and Educational sectors — bringing 20 years of cross-sector experience to every brief.' },
-              { q: 'What is your minimum project size?', a: 'We do not have a fixed minimum. We are happy to have an initial conversation about your brief and assess whether we are the right fit. Reach out and we will respond within 24 hours.' },
-            ].map((faq, i) => (
+            {faqList.map((faq, i) => (
               <FadeIn key={i} delay={i * 0.05}>
                 <div style={{ borderTop: `1px solid ${t.border}` }}>
                   <button className="faq-q" style={{ color: t.ink }} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
@@ -369,11 +399,11 @@ export default function AboutClient({ services, team, stats, values }: { service
 
         {/* CTA */}
         <section style={{ position: 'relative', height: '60vh', minHeight: 400, overflow: 'hidden' }}>
-          <img src={IMG3} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .9s ease' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'} />
+          {pc.ctaImage && <img src={pc.ctaImage} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .9s ease' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'} />}
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,12,10,.65)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 56px' }}>
             <FadeIn>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,4.5vw,4rem)', fontWeight: 400, color: '#f0ebe3', lineHeight: 1.1, marginBottom: 36, maxWidth: 600 }}>
-                Let's create something extraordinary together
+                {pc.ctaHeading}
               </h2>
               <Link href="/contact" className="btn-gold">Start a Conversation →</Link>
             </FadeIn>

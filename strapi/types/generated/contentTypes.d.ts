@@ -440,6 +440,61 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAboutpageAboutpage extends Struct.CollectionTypeSchema {
+  collectionName: 'aboutpages';
+  info: {
+    displayName: 'aboutpage';
+    pluralName: 'aboutpages';
+    singularName: 'aboutpage';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    ctaheading: Schema.Attribute.String;
+    ctaImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    faqLabel: Schema.Attribute.String;
+    gallery: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    heroHeading: Schema.Attribute.String;
+    heroimage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    herosubHeading: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::aboutpage.aboutpage'
+    > &
+      Schema.Attribute.Private;
+    philosophyAttribution: Schema.Attribute.String;
+    philosophyImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
+    philosophyLabel: Schema.Attribute.String;
+    philosophyQuote: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    storyHeading: Schema.Attribute.String;
+    storyImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    storyLabel: Schema.Attribute.String;
+    storyPara1: Schema.Attribute.Text;
+    storyPara2: Schema.Attribute.Text;
+    storyPara3: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCareerValueCareerValue extends Struct.CollectionTypeSchema {
   collectionName: 'career_values';
   info: {
@@ -464,7 +519,66 @@ export interface ApiCareerValueCareerValue extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     order: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
+    sectorsList: Schema.Attribute.Text;
     title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiCareersPageCareersPage extends Struct.CollectionTypeSchema {
+  collectionName: 'careers_pages';
+  info: {
+    displayName: 'Careers Page';
+    pluralName: 'careers-pages';
+    singularName: 'careers-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    heroHeading: Schema.Attribute.String;
+    heroImage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    heroLabel: Schema.Attribute.String;
+    heroSubtext: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::careers-page.careers-page'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiFaqFaq extends Struct.CollectionTypeSchema {
+  collectionName: 'faqs';
+  info: {
+    displayName: 'FAQ';
+    pluralName: 'faqs';
+    singularName: 'faq';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    answer: Schema.Attribute.Text;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::faq.faq'> &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer;
+    publishedAt: Schema.Attribute.DateTime;
+    question: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -567,10 +681,40 @@ export interface ApiJobOpeningJobOpening extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiJourneyStepJourneyStep extends Struct.CollectionTypeSchema {
+  collectionName: 'journey_steps';
+  info: {
+    displayName: 'Journey Step';
+    pluralName: 'journey-steps';
+    singularName: 'journey-step';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::journey-step.journey-step'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer;
+    publishedAt: Schema.Attribute.DateTime;
+    step: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPagePage extends Struct.CollectionTypeSchema {
   collectionName: 'pages';
   info: {
-    displayName: 'page';
+    displayName: 'home page';
     pluralName: 'pages';
     singularName: 'page';
   };
@@ -581,12 +725,19 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    ctaHeading: Schema.Attribute.String;
+    ctaimage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    ctalabel: Schema.Attribute.String;
     heroHeadline: Schema.Attribute.String;
     heroImages: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
       true
     >;
     heroSubtext: Schema.Attribute.String;
+    heroTagline: Schema.Attribute.String;
+    journeyHeading: Schema.Attribute.String;
+    journeyLabel: Schema.Attribute.String;
+    journeySubtext: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> &
       Schema.Attribute.Private;
@@ -594,6 +745,11 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     seoDescription: Schema.Attribute.Text;
     seoTitle: Schema.Attribute.String;
+    testimonialAuthor: Schema.Attribute.String;
+    testimonialImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
+    testimonialQuote: Schema.Attribute.Text;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -648,6 +804,37 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     year: Schema.Attribute.Integer;
+  };
+}
+
+export interface ApiProjetspageProjetspage extends Struct.CollectionTypeSchema {
+  collectionName: 'projetspages';
+  info: {
+    displayName: 'projetspage';
+    pluralName: 'projetspages';
+    singularName: 'projetspage';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::projetspage.projetspage'
+    > &
+      Schema.Attribute.Private;
+    portfolioheading: Schema.Attribute.String;
+    portfolioLabel: Schema.Attribute.String;
+    portfoliosubtext: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    sectorsList: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1279,12 +1466,17 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::aboutpage.aboutpage': ApiAboutpageAboutpage;
       'api::career-value.career-value': ApiCareerValueCareerValue;
+      'api::careers-page.careers-page': ApiCareersPageCareersPage;
+      'api::faq.faq': ApiFaqFaq;
       'api::gallery.gallery': ApiGalleryGallery;
       'api::inquiry.inquiry': ApiInquiryInquiry;
       'api::job-opening.job-opening': ApiJobOpeningJobOpening;
+      'api::journey-step.journey-step': ApiJourneyStepJourneyStep;
       'api::page.page': ApiPagePage;
       'api::project.project': ApiProjectProject;
+      'api::projetspage.projetspage': ApiProjetspageProjetspage;
       'api::service.service': ApiServiceService;
       'api::stat.stat': ApiStatStat;
       'api::team-member.team-member': ApiTeamMemberTeamMember;

@@ -11,7 +11,7 @@ const CREAM = '#FAF7F1'
 const DARK = '#111315'
 const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
-// Place these 7 files inside your project's /public/gallery/ folder
+
 const GALLERY_IMAGES: GalleryItem[] = [
   { src: '/gallery/project-01.webp' },
   { src: '/gallery/project-02.webp' },
@@ -28,7 +28,8 @@ const GALLERY_IMAGES: GalleryItem[] = [
 interface Stat { label: string; value: string }
 interface Project { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }
 interface GalleryItem { src: string }
-interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[]; gallery?: GalleryItem[] }
+interface JourneyStep { step: string; desc: string }
+interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[]; gallery?: GalleryItem[]; heroTagline?: string; ctaLabel?: string; ctaHeading?: string; ctaImage?: string; testimonialImage?: string; testimonialQuote?: string; testimonialAuthor?: string; journeyLabel?: string; journeyHeading?: string; journeySubtext?: string; journeySteps?: JourneyStep[] }
 
 function Logo({ onDark = false }: { onDark?: boolean }) {
   return (
@@ -64,13 +65,13 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
         return url.startsWith('http') ? url : url ? `${STRAPI}${url}` : ''
       })(),
     }))
-    fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&populate[heroImage]=true&pagination[limit]=9`)
+    fetch(`${STRAPI}/api/projects?filters[featured][$eq]=true&populate[heroImage]=true&pagination[limit]=9`, { cache: 'no-store' })
       .then(r => r.json())
       .then(json => {
         const mapped = mapProjects(json)
         if (mapped.length > 0) { setAllProjects(mapped); return }
         // No featured projects set yet — fall back to all projects so the gallery isn't empty.
-        return fetch(`${STRAPI}/api/projects?populate[heroImage]=true&pagination[limit]=9`)
+        return fetch(`${STRAPI}/api/projects?populate[heroImage]=true&pagination[limit]=9`, { cache: 'no-store' })
           .then(r => r.json())
           .then(fallbackJson => {
             const fallbackMapped = mapProjects(fallbackJson)
@@ -102,9 +103,7 @@ function GalleryGrid({ projects, dark, t }: { projects: any[]; dark: boolean; t:
     setPan({ x: dx * -18, y: dy * -18 })
   }
 
-  // Build a grid that adapts to however many images are actually available —
-  // avoids empty gaps when only a few featured projects exist. Quote card is
-  // only included when there's enough real content to keep the grid feeling full.
+  
   const slots: ({ kind: 'image'; p: any; imgIndex: number } | { kind: 'quote' })[] = []
   if (images.length >= 4) {
     let ii = 0
@@ -203,7 +202,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
   useEffect(() => {
     setMounted(true)
-    // Always start in the premium dark theme regardless of any previously saved preference.
+    
   }, [])
 
   useEffect(() => {
@@ -239,7 +238,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
   const heroProjects = data.projects.filter(p => p.heroImage).slice(0, 6)
   // Prefer gallery images from Strapi if provided; fall back to the local curated set.
-  const galleryImages = (data.gallery && data.gallery.length > 0) ? data.gallery : GALLERY_IMAGES
+  const galleryImages = data.gallery ?? []
   const heroImages = (data.heroImages && data.heroImages.length > 0)
     ? data.heroImages
     : (data.heroImage ? [data.heroImage] : (heroProjects.length > 0 ? heroProjects.map(p => p.heroImage) : []))
@@ -381,12 +380,12 @@ export default function HomeClient({ data }: { data: HomeData }) {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.15) 0%, rgba(17,19,21,.35) 55%, rgba(17,19,21,.82) 100%)' }} />
           
           <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 100px', animation: 'fadeUp 1.2s ease .2s both' }}>
-            <p style={{ fontSize: 12, letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 700 }}>EST. 2004 · PUNE, INDIA</p>
+            <p style={{ fontSize: 12, letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 700 }}>{data.heroTagline}</p>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4.5vw,5rem)', fontWeight: 500, color: '#fff', lineHeight: 1.05, maxWidth: 900, marginBottom: 28, textShadow: '0 4px 32px rgba(0,0,0,.6)' }}>
-              {data.heroHeadline || 'Designing Spaces That Shape The Future'}
+              {data.heroHeadline}
             </h1>
             <p style={{ fontSize: 16, color: '#fff', lineHeight: 1.85, maxWidth: 520, marginBottom: 48, fontWeight: 400, textShadow: '0 2px 16px rgba(0,0,0,.6)' }}>
-              {data.heroSubtext || 'A 20-year legacy of transforming spaces across hospitality, healthcare, retail, residential and industrial sectors.'}
+              {data.heroSubtext}
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Link href="/projects" className="btn-gold">Explore Our Work →</Link>
@@ -410,7 +409,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
           <FadeIn>
             <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>— Who We Are —</p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.9rem,3vw,2.8rem)', fontStyle: 'italic', fontWeight: 400, color: t.ink, lineHeight: 1.35, marginBottom: 28 }}>
-              {data.philosophyText || 'Architecture is a dialogue between the human spirit and the space it inhabits — we design for people, not photographs.'}
+              {data.philosophyText}
             </h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 24px', marginBottom: 28 }}>
               <span style={{ fontSize: 13, color: t.ink, fontWeight: 600 }}>Est. 2004 · Pune, India</span>
@@ -479,18 +478,13 @@ export default function HomeClient({ data }: { data: HomeData }) {
         <section className="pad" ref={statsRef} style={{ padding: '0', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
           <div className="stats-combo" style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', minHeight: 440 }}>
             <div style={{ position: 'relative', overflow: 'hidden' }}>
-              <img src={STATS_IMG} alt="A recent project" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .8s ease' }}
+              {data.testimonialImage && <img src={data.testimonialImage} alt="A recent project" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .8s ease' }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'none'} />
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'} />}
             </div>
             <div style={{ padding: '68px 64px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(data.stats.length || 4, 4)}, 1fr)`, gap: 0, marginBottom: 48, paddingBottom: 44, borderBottom: `1px solid ${t.border}` }}>
-                {(data.stats.length ? data.stats : [
-                  { label: 'Years of Excellence', value: '20+' },
-                  { label: 'Projects Delivered', value: '200+' },
-                  { label: 'Sectors Served', value: '8' },
-                  { label: 'Design Awards', value: '12' },
-                ]).slice(0, 4).map((stat, i) => (
+              <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(data.stats.length || 1, 4)}, 1fr)`, gap: 0, marginBottom: 48, paddingBottom: 44, borderBottom: `1px solid ${t.border}` }}>
+                {data.stats.slice(0, 4).map((stat, i) => (
                   <div key={stat.label} style={{ textAlign: 'left', paddingRight: 20 }}>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.4vw,3.2rem)', color: GOLD, fontWeight: 400, lineHeight: 1, marginBottom: 10 }}>
                       {getStatDisplay(stat)}
@@ -502,11 +496,11 @@ export default function HomeClient({ data }: { data: HomeData }) {
               <FadeIn>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3rem', color: GOLD, lineHeight: .3, marginBottom: 12 }}>"</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(1.3rem,2vw,1.6rem)', color: t.ink, lineHeight: 1.55, marginBottom: 22, maxWidth: 460 }}>
-                  They understood exactly what we wanted before we could fully explain it ourselves — the space feels completely like us.
+                  {data.testimonialQuote}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 28, height: 1, background: GOLD }} />
-                  <span style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: GOLD, fontWeight: 600 }}>A Recent Client</span>
+                  <span style={{ fontSize: 11, letterSpacing: '.18em', textTransform: 'uppercase', color: GOLD, fontWeight: 600 }}>{data.testimonialAuthor}</span>
                 </div>
               </FadeIn>
             </div>
@@ -518,18 +512,22 @@ export default function HomeClient({ data }: { data: HomeData }) {
         <section className="pad" style={{ padding: '104px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
           <FadeIn>
             <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 72px' }}>
-              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— How We Work —</p>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>Our Design Journey</h2>
-              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>Five deliberate stages, refined over two decades, that take a space from a first conversation to a finished home.</p>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>{data.journeyLabel}</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>{data.journeyHeading}</h2>
+              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>{data.journeySubtext}</p>
             </div>
           </FadeIn>
 
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+            {(() => {
+              const journeySteps = data.journeySteps || []
+              return (
+                <>
             {/* connecting timeline of numbers */}
-            <div className="process-timeline" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', position: 'relative', marginBottom: 28, padding: '0 34px' }}>
+            <div className="process-timeline" style={{ display: 'grid', gridTemplateColumns: `repeat(${journeySteps.length}, 1fr)`, position: 'relative', marginBottom: 28, padding: '0 34px' }}>
               <div style={{ position: 'absolute', top: 17, left: '10%', right: '10%', height: 1, background: t.border, zIndex: 0 }} />
-              {['Consultation', 'Planning', 'Design', 'Execution', 'Handover'].map((label, i) => (
-                <div key={label} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {journeySteps.map((s, i) => (
+                <div key={s.step} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div style={{ width: 34, height: 34, borderRadius: '50%', border: `1.5px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond', serif", fontSize: '.95rem', color: GOLD, background: t.subtle, fontWeight: 600 }}>
                     {String(i + 1).padStart(2, '0')}
                   </div>
@@ -537,14 +535,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
               ))}
             </div>
 
-            <div className="process-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 18 }}>
-              {[
-                { step: 'Consultation', desc: 'We listen first — understanding how you live, work and dream in the space.' },
-                { step: 'Planning & Concept', desc: 'Site study, budgets and a design direction that fits your brief and lifestyle.' },
-                { step: 'Design Development', desc: 'Materials, layouts and 3D visuals refined until every detail feels right.' },
-                { step: 'Execution', desc: 'On-site craftsmanship, managed closely from foundation to finish.' },
-                { step: 'Final Handover', desc: 'A space that\'s ready to live in — styled, inspected, and truly yours.' },
-              ].map((p, i) => (
+            <div className="process-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${journeySteps.length}, 1fr)`, gap: 18 }}>
+              {journeySteps.map((p, i) => (
                 <FadeIn key={p.step} delay={i * 0.08}>
                   <div className="process-card" style={{ position: 'relative', borderRadius: 6, height: 280, background: t.surface, border: `1px solid ${t.border}`, padding: '30px 24px', display: 'flex', flexDirection: 'column', transition: 'border-color .3s ease, transform .3s ease, box-shadow .3s ease' }}>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.2rem', fontWeight: 400, color: GOLD, opacity: .55, lineHeight: 1, marginBottom: 22 }}>{String(i + 1).padStart(2, '0')}</div>
@@ -555,6 +547,9 @@ export default function HomeClient({ data }: { data: HomeData }) {
                 </FadeIn>
               ))}
             </div>
+                </>
+              )
+            })()}
           </div>
         </section>
 
@@ -583,15 +578,15 @@ export default function HomeClient({ data }: { data: HomeData }) {
         
 {/* CTA BANNER */}
         <section style={{ position: 'relative', height: '55vh', minHeight: 360, overflow: 'hidden', borderBottom: `2px solid ${GOLD}` }}>
-          {data.projects[2]?.heroImage || data.projects[0]?.heroImage
-            ? <img src={data.projects[2]?.heroImage || data.projects[0]?.heroImage} alt="Interior design" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          {data.ctaImage || data.projects[2]?.heroImage || data.projects[0]?.heroImage
+            ? <img src={data.ctaImage || data.projects[2]?.heroImage || data.projects[0]?.heroImage} alt="Interior design" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #2a2420 0%, ${DARK} 100%)` }} />
           }
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(17,19,21,.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 56px' }}>
             <FadeIn>
-              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>— Start Your Project —</p>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>{data.ctaLabel}</p>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,5vw,4.5rem)', fontWeight: 400, color: '#fff', lineHeight: 1.1, marginBottom: 36, maxWidth: 700 }}>
-                Let's create something extraordinary together
+                {data.ctaHeading}
               </h2>
               <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link href="/contact" className="btn-gold">Start a Conversation →</Link>

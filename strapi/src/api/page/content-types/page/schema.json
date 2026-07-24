@@ -4,7 +4,7 @@
   "info": {
     "singularName": "page",
     "pluralName": "pages",
-    "displayName": "page"
+    "displayName": "home page"
   },
   "options": {
     "draftAndPublish": true
@@ -34,6 +34,50 @@
       "type": "string"
     },
     "seoDescription": {
+      "type": "text"
+    },
+    "heroTagline": {
+      "type": "string"
+    },
+    "ctalabel": {
+      "type": "string"
+    },
+    "ctaHeading": {
+      "type": "string"
+    },
+    "ctaimage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "testimonialImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "testimonialQuote": {
+      "type": "text"
+    },
+    "testimonialAuthor": {
+      "type": "string"
+    },
+    "journeyLabel": {
+      "type": "string"
+    },
+    "journeyHeading": {
+      "type": "string"
+    },
+    "journeySubtext": {
       "type": "text"
     }
   }
