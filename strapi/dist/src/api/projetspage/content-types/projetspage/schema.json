@@ -1,0 +1,27 @@
+{
+    "kind": "collectionType",
+    "collectionName": "projetspages",
+    "info": {
+        "singularName": "projetspage",
+        "pluralName": "projetspages",
+        "displayName": "projetspage"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "portfolioLabel": {
+            "type": "string"
+        },
+        "portfolioheading": {
+            "type": "string"
+        },
+        "portfoliosubtext": {
+            "type": "text"
+        },
+        "sectorsList": {
+            "type": "string"
+        }
+    }
+}
