@@ -5,9 +5,9 @@ const config = ({ env }) => ({
         config: {
             provider: 'cloudinary',
             providerOptions: {
-                cloud_name: env('dzmj2j8rh'),
-                api_key: env('916956428227632'),
-                api_secret: env('1PBpquTU9efY_5yPqE6ljHUKSKk'),
+                cloud_name: env('CLOUDINARY_NAME'),
+                api_key: env('CLOUDINARY_KEY'),
+                api_secret: env('CLOUDINARY_SECRET'),
             },
             actionOptions: {
                 upload: {},
