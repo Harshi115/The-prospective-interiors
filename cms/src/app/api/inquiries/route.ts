@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import nodemailer from 'nodemailer'
 
 const InquirySchema = z.object({
   name:    z.string().min(2).max(100).trim(),
@@ -7,23 +8,21 @@ const InquirySchema = z.object({
   message: z.string().min(10).max(2000).trim(),
 })
 
-async function sendWhatsAppNotification(data: { name: string; email: string; phone: string; message: string }) {
+// ---- Notify the OWNER on WhatsApp (existing feature) ----
+async function sendOwnerWhatsAppNotification(data: { name: string; email: string; phone: string; message: string }) {
   const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID
   const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN
-  const OWNER_WHATSAPP_NUMBER = process.env.OWNER_WHATSAPP_NUMBER // e.g. "919876543210" (no +, no spaces)
+  const OWNER_WHATSAPP_NUMBER = process.env.OWNER_WHATSAPP_NUMBER
 
   if (!PHONE_NUMBER_ID || !ACCESS_TOKEN || !OWNER_WHATSAPP_NUMBER) {
-    console.warn('WhatsApp notification skipped: missing env vars')
+    console.warn('Owner WhatsApp notification skipped: missing env vars')
     return
   }
 
   try {
     const res = await fetch(`https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         to: OWNER_WHATSAPP_NUMBER,
@@ -45,13 +44,77 @@ async function sendWhatsAppNotification(data: { name: string; email: string; pho
         },
       }),
     })
-
-    if (!res.ok) {
-      const errText = await res.text()
-      console.error('WhatsApp send error:', errText)
-    }
+    if (!res.ok) console.error('Owner WhatsApp send error:', await res.text())
   } catch (err) {
-    console.error('WhatsApp notification error:', err)
+    console.error('Owner WhatsApp notification error:', err)
+  }
+}
+
+// ---- Confirm to the CUSTOMER on WhatsApp (new) ----
+async function sendCustomerWhatsAppConfirmation(data: { name: string; phone: string }) {
+  const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID
+  const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN
+
+  if (!PHONE_NUMBER_ID || !ACCESS_TOKEN || !data.phone) {
+    console.warn('Customer WhatsApp confirmation skipped: missing env vars or phone')
+    return
+  }
+
+  // WhatsApp numbers must be in international format, digits only (no +, no spaces)
+  const sanitizedPhone = data.phone.replace(/[^0-9]/g, '')
+  if (!sanitizedPhone) return
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: sanitizedPhone,
+        type: 'template',
+        template: {
+          name: 'inquiry_confirmation', // <-- must be created + approved in Meta first
+          language: { code: 'en' },
+          components: [
+            {
+              type: 'body',
+              parameters: [{ type: 'text', text: data.name }],
+            },
+          ],
+        },
+      }),
+    })
+    if (!res.ok) console.error('Customer WhatsApp send error:', await res.text())
+  } catch (err) {
+    console.error('Customer WhatsApp confirmation error:', err)
+  }
+}
+
+// ---- Confirm to the CUSTOMER via email (new) ----
+async function sendCustomerEmailConfirmation(data: { name: string; email: string }) {
+  const GMAIL_USER = process.env.GMAIL_USER
+  const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD
+
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+    console.warn('Customer email confirmation skipped: missing env vars')
+    return
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
+    })
+
+    await transporter.sendMail({
+      from: `"The Prospective Interiors" <${GMAIL_USER}>`,
+      to: data.email,
+      subject: 'We received your message — The Prospective Interiors',
+      text: `Hi ${data.name},\n\nThank you for reaching out to The Prospective Interiors! We've received your message and our team will get in touch with you shortly.\n\nWarm regards,\nThe Prospective Interiors Team`,
+      html: `<p>Hi ${data.name},</p><p>Thank you for reaching out to <strong>The Prospective Interiors</strong>! We've received your message and our team will get in touch with you shortly.</p><p>Warm regards,<br/>The Prospective Interiors Team</p>`,
+    })
+  } catch (err) {
+    console.error('Customer email confirmation error:', err)
   }
 }
 
@@ -89,13 +152,15 @@ export async function POST(req: Request) {
 
     const data = await strapiRes.json()
 
-    // Fire-and-forget: don't block the response on WhatsApp send succeeding
-    sendWhatsAppNotification({
+    // Notify owner + confirm to customer — awaited so Vercel doesn't kill the function early
+    await sendOwnerWhatsAppNotification({
       name: result.data.name,
       email: result.data.email,
       phone: result.data.phone || '',
       message: result.data.message,
     })
+    await sendCustomerWhatsAppConfirmation({ name: result.data.name, phone: result.data.phone || '' })
+    await sendCustomerEmailConfirmation({ name: result.data.name, email: result.data.email })
 
     return Response.json({ success: true, id: String(data.data?.id) }, { status: 201 })
   } catch (err) {
