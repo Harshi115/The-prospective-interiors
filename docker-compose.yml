@@ -1,22 +1,47 @@
-FROM node:20-alpine
-# Build dependencies needed by native packages (e.g. sharp, better-sqlite3)
-RUN apk update && apk add --no-cache \
-    build-base \
-    gcc \
-    autoconf \
-    automake \
-    zlib-dev \
-    libpng-dev \
-    nasm \
-    bash \
-    vips-dev \
-    git \
-    python3
-WORKDIR /app
-ENV NODE_OPTIONS="--max-old-space-size=460"
-COPY package.json package-lock.json* ./
-RUN npm install
-COPY . .
-RUN npm run build
-EXPOSE 1337
-CMD ["npm", "run", "start"]
+version: '3.8'
+
+services:
+  # Strapi CMS
+  strapi:
+    build:
+      context: ./strapi
+      dockerfile: Dockerfile
+    container_name: tpi-strapi
+    command: npm run develop
+    restart: unless-stopped
+    env_file: ./strapi/.env
+    environment:
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: .tmp/data.db
+      NODE_ENV: development
+    volumes:
+      - ./strapi:/app
+      - /app/node_modules
+      
+    ports:
+      - '1337:1337'
+    networks:
+      - tpi-network
+
+  # Next.js Frontend
+  nextjs:
+    build:
+      context: ./cms
+      dockerfile: Dockerfile
+    container_name: tpi-frontend
+    restart: unless-stopped
+    environment:
+      STRAPI_INTERNAL_URL: http://strapi:1337
+      NEXT_PUBLIC_STRAPI_URL: http://localhost:1337
+    ports:
+      - '3000:3000'
+    depends_on:
+      - strapi
+    networks:
+      - tpi-network
+
+
+
+networks:
+  tpi-network:
+    driver: bridge

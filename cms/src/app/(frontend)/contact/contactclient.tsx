@@ -70,12 +70,12 @@ export default function ContactClient() {
     if (!form.message.trim()) { setErr('Please tell us about your project'); return }
     setErr(''); setStatus('loading')
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
-      await fetch(`${API}/api/contact`, {
+      const res = await fetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      if (!res.ok) throw new Error('Failed to submit')
     } catch {}
     setStatus('success')
     setForm({ name: '', email: '', phone: '', projectType: '', message: '' })
