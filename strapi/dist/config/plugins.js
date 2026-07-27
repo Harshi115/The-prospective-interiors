@@ -16,4 +16,4 @@ const config = ({ env }) => ({
         },
     },
 });
-exports.default = config;ns.js
+exports.default = config;
