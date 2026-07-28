@@ -29,7 +29,7 @@ interface Stat { label: string; value: string }
 interface Project { id: string; title: string; slug: string; location: string; year: number | null; sector: string; client: string; heroImage: string; description: string }
 interface GalleryItem { src: string }
 interface JourneyStep { step: string; desc: string }
-interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[]; gallery?: GalleryItem[]; heroTagline?: string; ctaLabel?: string; ctaHeading?: string; ctaImage?: string; testimonialImage?: string; testimonialQuote?: string; testimonialAuthor?: string; journeyLabel?: string; journeyHeading?: string; journeySubtext?: string; journeySteps?: JourneyStep[] }
+interface HomeData { heroHeadline: string; heroSubtext: string; philosophyText: string; heroImage: string; heroImages?: string[]; stats: Stat[]; services: any[]; team: any[]; projects: Project[]; gallery?: GalleryItem[]; heroTagline?: string; ctaLabel?: string; ctaHeading?: string; ctaImage?: string; testimonialImage?: string; testimonialQuote?: string; testimonialAuthor?: string; journeyLabel?: string; journeyHeading?: string; journeySubtext?: string; journeySteps?: JourneyStep[] journeyImage?: string }
 
 function Logo({ onDark = false }: { onDark?: boolean }) {
   return (
