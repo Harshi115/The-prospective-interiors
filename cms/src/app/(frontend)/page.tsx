@@ -24,6 +24,7 @@ const FALLBACK_DATA = {
   journeyLabel: '',
   journeyHeading: '',
   journeySubtext: '',
+  journeyImage: '',
   journeySteps: [] as { step: string; desc: string }[],
   heroImage: '',
   heroImages: [] as string[],
@@ -44,7 +45,7 @@ export default async function HomePage() {
 
   try {
     const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes, galleryRes, journeyRes] = await Promise.all([
-      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[0]=testimonialImage&populate[1]=ctaimage&populate[2]=heroImages`, { headers, next: { revalidate: 60 } }),
+      fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[0]=testimonialImage&populate[1]=ctaimage&populate[2]=heroImages&populate[3]=journeyImage`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/services?sort=order:asc`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/team-members?sort=order:asc&populate=photo`, { headers, next: { revalidate: 60 } }),
@@ -114,6 +115,7 @@ export default async function HomePage() {
       journeyLabel:    page.journeyLabel    ?? '',
       journeyHeading:  page.journeyHeading  ?? '',
       journeySubtext:  page.journeySubtext  ?? '',
+      journeyImage:    getImgUrl(Array.isArray(page.journeyImage) ? page.journeyImage[0] : page.journeyImage),
       journeySteps: (journeyJson?.data ?? []).map((j: any) => ({
         step: j.step ?? j.title ?? '',
         desc: j.description ?? j.desc ?? '',

@@ -736,6 +736,10 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     heroSubtext: Schema.Attribute.String;
     heroTagline: Schema.Attribute.String;
     journeyHeading: Schema.Attribute.String;
+    journeyImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
     journeyLabel: Schema.Attribute.String;
     journeySubtext: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;

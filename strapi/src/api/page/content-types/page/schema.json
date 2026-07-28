@@ -79,6 +79,16 @@
     },
     "journeySubtext": {
       "type": "text"
+    },
+    "journeyImage": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

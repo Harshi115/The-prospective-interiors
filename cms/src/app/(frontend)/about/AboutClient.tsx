@@ -231,15 +231,15 @@ export default function AboutClient({ services, team, stats, values, pageContent
         </nav>
 
         {/* HERO — Full screen luxury */}
-        <section style={{ position: 'relative', height: '85vh', minHeight: 560, overflow: 'hidden' }}>
-          {pc.heroImage && <img src={pc.heroImage} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.15) 0%, rgba(17,19,21,.35) 55%, rgba(17,19,21,.82) 100%)' }} />
-          <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 100px', animation: 'fadeUp 1s ease .1s both' }}>
-            <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>Est. 2004 · Pune, India</p>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,5.8rem)', fontWeight: 400, color: '#fff', lineHeight: 1.08, maxWidth: 820, marginBottom: 24, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
+        <section style={{ position: 'relative', height: '78vh', minHeight: 520, maxHeight: 760, overflow: 'hidden' }}>
+          {pc.heroImage && <img src={pc.heroImage} alt="Luxury Interior" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.25) 0%, rgba(17,19,21,.2) 45%, rgba(17,19,21,.85) 100%)' }} />
+          <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 84px', animation: 'fadeUp 1s ease .1s both' }}>
+            <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 18, fontWeight: 600 }}>Est. 2004 · Pune, India</p>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: 'clamp(2.2rem,3.8vw,3.6rem)', fontWeight: 400, color: '#fff', lineHeight: 1.15, maxWidth: 680, marginBottom: 20, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
               {pc.heroHeading}
             </h1>
-            <p style={{ fontSize: 16, color: 'rgba(255,255,255,.72)', lineHeight: 1.85, maxWidth: 480, marginBottom: 44, fontWeight: 300 }}>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,.72)', lineHeight: 1.85, maxWidth: 440, marginBottom: 36, fontWeight: 300 }}>
               {pc.heroSubHeading}
             </p>
             <Link href="/contact" className="btn-gold">Begin a Conversation →</Link>

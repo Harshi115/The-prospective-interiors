@@ -313,8 +313,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
         .proj-card:hover .proj-overlay{opacity:1}
         .ft-link{font-size:13px;color:rgba(255,255,255,.4);transition:color .2s;text-decoration:none}.ft-link:hover{color:${GOLD}}
         .feat-img-wrap img:hover{transform:scale(1.05)}
-        .process-card:hover{border-color:${GOLD}!important;transform:translateY(-4px);box-shadow:0 16px 40px rgba(30,25,15,.08)}
-        .process-card:hover .process-card-line{width:44px}
+        .journey-row:hover h3{color:${GOLD}}
+        @media (max-width: 900px){.journey-split{grid-template-columns:1fr!important}.journey-img-wrap{position:relative!important;top:0!important;height:320px!important;order:-1;margin-bottom:8px}}
         .bento-card:hover .bento-card-img{transform:scale(1.07)}
         .bento-card:hover .bento-card-arrow{opacity:1!important;transform:translateX(0)!important}
         .palo-card:hover .palo-card-img{transform:scale(1.06)}
@@ -365,7 +365,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
         
 {/* HERO */}
-        <section style={{ position: 'relative', height: '90vh', minHeight: 620, overflow: 'hidden' }}>
+        <section style={{ position: 'relative', height: '100vh', minHeight: 720, overflow: 'hidden' }}>
           {heroImages.length > 0
             ? heroImages.map((img, i) => (
                 <img key={img + i} src={img} alt="Hero" style={{
@@ -377,14 +377,14 @@ export default function HomeClient({ data }: { data: HomeData }) {
               ))
             : <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #2a2420 0%, ${DARK} 100%)` }} />
           }
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.15) 0%, rgba(17,19,21,.35) 55%, rgba(17,19,21,.82) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(17,19,21,.25) 0%, rgba(17,19,21,.30) 40%, rgba(17,19,21,.55) 68%, rgba(17,19,21,.92) 100%)' }} />
           
-          <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 100px', animation: 'fadeUp 1.2s ease .2s both' }}>
-            <p style={{ fontSize: 12, letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 700 }}>{data.heroTagline}</p>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4.5vw,5rem)', fontWeight: 500, color: '#fff', lineHeight: 1.05, maxWidth: 900, marginBottom: 28, textShadow: '0 4px 32px rgba(0,0,0,.6)' }}>
+          <div className="pad" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 72px 110px', animation: 'fadeUp 1.2s ease .2s both' }}>
+            <p style={{ fontSize: 12, letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: 24, fontWeight: 700, textShadow: '0 2px 12px rgba(0,0,0,.7)' }}>{data.heroTagline}</p>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,6.2rem)', fontWeight: 500, color: '#fff', lineHeight: 1.03, maxWidth: 960, marginBottom: 28, textShadow: '0 4px 40px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.6)' }}>
               {data.heroHeadline}
             </h1>
-            <p style={{ fontSize: 16, color: '#fff', lineHeight: 1.85, maxWidth: 520, marginBottom: 48, fontWeight: 400, textShadow: '0 2px 16px rgba(0,0,0,.6)' }}>
+            <p style={{ fontSize: 17, color: '#fff', lineHeight: 1.85, maxWidth: 540, marginBottom: 48, fontWeight: 400, textShadow: '0 2px 20px rgba(0,0,0,.75), 0 1px 4px rgba(0,0,0,.6)' }}>
               {data.heroSubtext}
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -509,47 +509,50 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
         
 {/* DESIGN JOURNEY */}
-        <section className="pad" style={{ padding: '104px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
+        <section className="pad" style={{ padding: '120px 72px', borderBottom: `1px solid ${t.border}`, background: t.subtle }}>
           <FadeIn>
-            <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 72px' }}>
-              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>{data.journeyLabel}</p>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>{data.journeyHeading}</h2>
-              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>{data.journeySubtext}</p>
+            <div style={{ maxWidth: 580, margin: '0 auto 80px' }}>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 14, fontWeight: 600 }}>{data.journeyLabel}</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4.2vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.08, marginBottom: 18 }}>{data.journeyHeading}</h2>
+              <p style={{ fontSize: 14, color: t.muted, lineHeight: 1.75 }}>{data.journeySubtext}</p>
             </div>
           </FadeIn>
 
-          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-            {(() => {
-              const journeySteps = data.journeySteps || []
-              return (
-                <>
-            {/* connecting timeline of numbers */}
-            <div className="process-timeline" style={{ display: 'grid', gridTemplateColumns: `repeat(${journeySteps.length}, 1fr)`, position: 'relative', marginBottom: 28, padding: '0 34px' }}>
-              <div style={{ position: 'absolute', top: 17, left: '10%', right: '10%', height: 1, background: t.border, zIndex: 0 }} />
-              {journeySteps.map((s, i) => (
-                <div key={s.step} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', border: `1.5px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond', serif", fontSize: '.95rem', color: GOLD, background: t.subtle, fontWeight: 600 }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </div>
-                </div>
-              ))}
+          <div className="journey-split" style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', gap: 64, alignItems: 'start' }}>
+            {/* Side image */}
+            <div className="journey-img-wrap" style={{ position: 'sticky', top: 100, borderRadius: 10, overflow: 'hidden', height: 640, background: t.border }}>
+              {data.journeyImage ? (
+                <img src={data.journeyImage} alt={data.journeyHeading || 'Our design journey'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : null}
             </div>
 
-            <div className="process-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${journeySteps.length}, 1fr)`, gap: 18 }}>
-              {journeySteps.map((p, i) => (
-                <FadeIn key={p.step} delay={i * 0.08}>
-                  <div className="process-card" style={{ position: 'relative', borderRadius: 6, height: 280, background: t.surface, border: `1px solid ${t.border}`, padding: '30px 24px', display: 'flex', flexDirection: 'column', transition: 'border-color .3s ease, transform .3s ease, box-shadow .3s ease' }}>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.2rem', fontWeight: 400, color: GOLD, opacity: .55, lineHeight: 1, marginBottom: 22 }}>{String(i + 1).padStart(2, '0')}</div>
-                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', fontWeight: 500, color: t.ink, marginBottom: 12, lineHeight: 1.25 }}>{p.step}</h3>
-                    <p style={{ fontSize: 12, color: t.muted, lineHeight: 1.7 }}>{p.desc}</p>
-                    <div className="process-card-line" style={{ marginTop: 'auto', width: 24, height: 1, background: GOLD, transition: 'width .35s ease' }} />
-                  </div>
-                </FadeIn>
-              ))}
+            {/* Vertical steps */}
+            <div>
+              {(() => {
+                const journeySteps = data.journeySteps || []
+                return journeySteps.map((p, i) => (
+                  <FadeIn key={p.step} delay={i * 0.08}>
+                    <div
+                      className="journey-row"
+                      style={{
+                        display: 'flex',
+                        gap: 28,
+                        padding: '34px 0',
+                        borderTop: i === 0 ? 'none' : `1px solid ${t.border}`,
+                      }}
+                    >
+                      <div style={{ flexShrink: 0, paddingTop: 6 }}>
+                        <div style={{ width: 9, height: 9, borderRadius: '50%', background: GOLD }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.65rem', fontWeight: 500, color: t.ink, marginBottom: 10, lineHeight: 1.2, transition: 'color .3s ease' }}>{p.step}</h3>
+                        <p style={{ fontSize: 13, color: t.muted, lineHeight: 1.85, maxWidth: 480 }}>{p.desc}</p>
+                      </div>
+                    </div>
+                  </FadeIn>
+                ))
+              })()}
             </div>
-                </>
-              )
-            })()}
           </div>
         </section>
 
