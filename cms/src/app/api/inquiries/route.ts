@@ -45,6 +45,43 @@ async function sendOwnerWhatsAppNotification(data: { name: string; email: string
   }
 }
 
+async function sendCustomerWhatsAppNotification(data: { name: string; phone: string }) {
+  const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID
+  const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN
+  if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
+    console.warn('Customer WhatsApp confirmation skipped: missing env vars')
+    return
+  }
+  if (!data.phone) {
+    // No phone number was provided on the form — nothing to send to.
+    return
+  }
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: data.phone,
+        type: 'template',
+        template: {
+          name: 'inquiry_confirmation',
+          language: { code: 'en' },
+          components: [{
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.name },
+            ],
+          }],
+        },
+      }),
+    })
+    if (!res.ok) console.error('Customer WhatsApp send error:', await res.text())
+  } catch (err) {
+    console.error('Customer WhatsApp notification error:', err)
+  }
+}
+
 async function sendCustomerEmailConfirmation(data: { name: string; email: string }) {
   const GMAIL_USER = process.env.GMAIL_USER
   const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD
@@ -103,9 +140,7 @@ export async function POST(req: Request) {
 
     const data = await strapiRes.json()
 
-    // Run both notifications in PARALLEL (not sequential) to stay well under Vercel's timeout.
-    // Customer WhatsApp confirmation is deliberately left out until the 'inquiry_confirmation'
-    // template is approved by Meta — add it back into this Promise.all once approved.
+    // Run all notifications in PARALLEL (not sequential) to stay well under Vercel's timeout.
     await Promise.all([
       sendOwnerWhatsAppNotification({
         name: result.data.name,
@@ -114,6 +149,7 @@ export async function POST(req: Request) {
         message: result.data.message,
       }),
       sendCustomerEmailConfirmation({ name: result.data.name, email: result.data.email }),
+      sendCustomerWhatsAppNotification({ name: result.data.name, phone: result.data.phone || '' }),
     ])
 
     return Response.json({ success: true, id: String(data.data?.id) }, { status: 201 })
