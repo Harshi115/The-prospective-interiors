@@ -91,7 +91,7 @@ body {
 
 
 .hero h1 {
-  font-family: "DM Serif Display", serif;
+  font-family: var(--font-dm-serif), "DM Serif Display", serif;
   font-size: 5rem;
   line-height: 1.05;
   max-width: 900px;
@@ -179,7 +179,7 @@ body {
 }
 
 .stat-card h2 {
-  font-family: "DM Serif Display", serif;
+  font-family: var(--font-dm-serif), "DM Serif Display", serif;
 
   font-size: 4rem;
 
@@ -284,7 +284,7 @@ body {
 }
 
 .services h2 {
-  font-family: "DM Serif Display", serif;
+  font-family: var(--font-dm-serif), "DM Serif Display", serif;
 
   font-size: 3rem;
 
@@ -549,7 +549,7 @@ body {
 }
 
 .process h2 {
-  font-family: "DM Serif Display", serif;
+  font-family: var(--font-dm-serif), "DM Serif Display", serif;
 
   font-size: 3rem;
 
@@ -588,7 +588,7 @@ body {
 
   font-size: 3rem;
 
-  font-family: "DM Serif Display", serif;
+  font-family: var(--font-dm-serif), "DM Serif Display", serif;
 
   display: block;
 

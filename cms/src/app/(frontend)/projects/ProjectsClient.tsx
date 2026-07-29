@@ -4,8 +4,6 @@ import Link from 'next/link'
 
 const GOLD = '#D8C3A5'
 const GOLD_HOVER = '#E4CCAA'
-const SECONDARY_ACCENT = '#A8794D'
-const CREAM = '#FAF7F1'
 const DARK = '#111315'
 const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 
@@ -28,9 +26,6 @@ export default function ProjectsClient({ projects: initialProjects, pageContent 
   const portfolioLabel = pageContent?.portfolioLabel
   const portfolioHeading = pageContent?.portfolioHeading
   const portfolioSubtext = pageContent?.portfolioSubtext
-  // CMS-managed hero image, with the previous hardcoded photo as a safety fallback
-  // in case the field hasn't been filled in on the Strapi side yet.
-  // Fully CMS-driven — no hardcoded fallback image.
   const heroImageSrc = pageContent?.heroImage || ''
   const SECTORS = ['All', ...(pageContent?.sectorsList ?? [])]
   const [projects, setProjects] = useState<Project[]>(initialProjects)
