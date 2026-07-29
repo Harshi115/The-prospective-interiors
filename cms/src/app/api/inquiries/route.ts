@@ -8,6 +8,17 @@ const InquirySchema = z.object({
   message: z.string().min(10).max(2000).trim(),
 })
 
+// Normalizes an Indian phone number into WhatsApp's expected format: digits only,
+// with country code, no '+', no spaces/dashes. e.g. "+91 98765-43210" -> "919876543210"
+// and "9876543210" -> "919876543210".
+function normalizeIndianPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 10) return `91${digits}`
+  if (digits.length === 12 && digits.startsWith('91')) return digits
+  if (digits.length === 11 && digits.startsWith('0')) return `91${digits.slice(1)}`
+  return digits
+}
+
 async function sendOwnerWhatsAppNotification(data: { name: string; email: string; phone: string; message: string }) {
   const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID
   const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN
@@ -56,13 +67,14 @@ async function sendCustomerWhatsAppNotification(data: { name: string; phone: str
     // No phone number was provided on the form — nothing to send to.
     return
   }
+  const normalizedPhone = normalizeIndianPhone(data.phone)
   try {
     const res = await fetch(`https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
-        to: data.phone,
+        to: normalizedPhone,
         type: 'template',
         template: {
           name: 'inquiry_confirmation',

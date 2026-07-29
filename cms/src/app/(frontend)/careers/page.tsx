@@ -24,14 +24,21 @@ export default async function CareersPage() {
     heroHeading: '',
     heroSubtext: '',
     heroImage: '',
+    sideImage: '',
   }
 
   try {
-    const res = await fetch(`${STRAPI}/api/careers-pages?populate[0]=heroImage`, { headers, next: { revalidate: 60 } })
+    // Populate BOTH heroImage and sideImage from Strapi.
+    const res = await fetch(`${STRAPI}/api/careers-pages?populate[0]=heroImage&populate[1]=sideImage`, { headers, next: { revalidate: 60 } })
     if (res.ok) {
       const json = await res.json()
       const data = json?.data?.[0] ?? {}
-      pageContent = { ...pageContent, ...data, heroImage: getImgUrl(data.heroImage) || '' }
+      pageContent = {
+        ...pageContent,
+        ...data,
+        heroImage: getImgUrl(data.heroImage) || '',
+        sideImage: getImgUrl(data.sideImage) || '',
+      }
     }
   } catch (error) {
     console.error('Careers page content fetch error:', error)

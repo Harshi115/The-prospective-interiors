@@ -1,29 +1,35 @@
 {
     "kind": "collectionType",
-    "collectionName": "projetspages",
+    "collectionName": "applications",
     "info": {
-        "singularName": "projetspage",
-        "pluralName": "projetspages",
-        "displayName": "projetspage"
+        "singularName": "application",
+        "pluralName": "applications",
+        "displayName": "application"
     },
     "options": {
         "draftAndPublish": true
     },
     "pluginOptions": {},
     "attributes": {
-        "portfolioLabel": {
+        "name": {
             "type": "string"
         },
-        "portfolioheading": {
+        "email": {
+            "type": "email"
+        },
+        "phone": {
             "type": "string"
         },
-        "portfoliosubtext": {
+        "position": {
+            "type": "string"
+        },
+        "experience": {
+            "type": "string"
+        },
+        "message": {
             "type": "text"
         },
-        "sectorsList": {
-            "type": "string"
-        },
-        "heroImage": {
+        "resume": {
             "type": "media",
             "multiple": false,
             "allowedTypes": [

@@ -104,6 +104,7 @@ export default function ProjectDetailClient({ project: initialProject, related }
         .gallery-img:hover{transform:scale(1.02);box-shadow:0 12px 40px rgba(0,0,0,.15)}
         .gallery-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
         .gallery-img:hover img{transform:scale(1.05)}
+        .gallery-img:hover .gallery-img-overlay,.gallery-img:hover .gallery-img-caption{opacity:1}
         .lb-arr{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);width:48px;height:48px;border-radius:24px;cursor:pointer;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
         .lb-arr:hover{background:rgba(255,255,255,.2)}
         .rel-card{border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .4s,box-shadow .4s,border-color .4s;display:block;text-decoration:none;border:1px solid rgba(216,195,165,.18);box-shadow:0 10px 32px rgba(30,25,15,.08)}
@@ -168,7 +169,7 @@ export default function ProjectDetailClient({ project: initialProject, related }
               <span style={{ color: 'rgba(255,255,255,.3)' }}>·</span>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD }}>{project.sector}</span>
             </div>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.8rem,5.5vw,5.5rem)', fontWeight: 400, color: '#fff', lineHeight: 1.06, maxWidth: 820, marginBottom: 32, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,4.2vw,4.2rem)', fontWeight: 400, color: '#fff', lineHeight: 1.1, maxWidth: 780, marginBottom: 28, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
               {project.title}
             </h1>
             {/* Meta pills */}
@@ -196,10 +197,11 @@ export default function ProjectDetailClient({ project: initialProject, related }
 
         {/* DESCRIPTION */}
         {project.description && (
-          <section className="pad" style={{ padding: '80px 72px', borderBottom: `1px solid ${t.border}` }}>
-            <div style={{ maxWidth: 800, margin: '0 auto' }}>
-              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 20, fontWeight: 600 }}>— About This Project —</p>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.1rem,2vw,1.35rem)', fontWeight: 300, color: t.ink, lineHeight: 1.9, whiteSpace: 'pre-line' }}>
+          <section className="pad" style={{ padding: '88px 72px', borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ maxWidth: 820, margin: '0 auto', position: 'relative' }}>
+              <span aria-hidden style={{ position: 'absolute', top: -36, left: -8, fontFamily: "'Cormorant Garamond', serif", fontSize: '5.5rem', lineHeight: 1, color: GOLD, opacity: .25, userSelect: 'none' }}>&ldquo;</span>
+              <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 22, fontWeight: 600, position: 'relative' }}>— About This Project —</p>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.2rem,2.1vw,1.5rem)', fontWeight: 300, color: t.ink, lineHeight: 1.95, whiteSpace: 'pre-line', position: 'relative' }}>
                 {project.description}
               </div>
             </div>
@@ -208,16 +210,18 @@ export default function ProjectDetailClient({ project: initialProject, related }
 
         {/* GALLERY */}
         {allImgs.length > 1 && (
-          <section className="pad" style={{ padding: '80px 72px', background: t.subtle, borderBottom: `1px solid ${t.border}` }}>
-            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 36, fontWeight: 600 }}>— Project Gallery —</p>
-            <div className="gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+          <section className="pad" style={{ padding: '88px 72px', background: t.subtle, borderBottom: `1px solid ${t.border}` }}>
+            <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 40, fontWeight: 600 }}>— Project Gallery —</p>
+            <div className="gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, maxWidth: 1400, margin: '0 auto' }}>
               {allImgs.map((src, i) => (
-                <div key={i} className="gallery-img" style={{ height: i === 0 ? 480 : 280, gridColumn: i === 0 ? 'span 2' : 'auto' }} onClick={() => setLightboxIdx(i)}>
+                <div key={i} className="gallery-img" style={{ position: 'relative', aspectRatio: '4 / 5' }} onClick={() => setLightboxIdx(i)}>
                   <img src={src} alt={`${project.title} — ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,12,10,.55) 0%, transparent 45%)', opacity: 0, transition: 'opacity .35s ease' }} className="gallery-img-overlay" />
+                  <span style={{ position: 'absolute', bottom: 14, left: 16, fontSize: 12, color: '#fff', fontWeight: 600, letterSpacing: '.04em', opacity: 0, transition: 'opacity .35s ease' }} className="gallery-img-caption">{String(i + 1).padStart(2, '0')} / {String(allImgs.length).padStart(2, '0')}</span>
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 12, color: t.muted, marginTop: 16, textAlign: 'center' }}>Click any image to view full screen</p>
+            <p style={{ fontSize: 12, color: t.muted, marginTop: 20, textAlign: 'center' }}>Click any image to view full screen</p>
           </section>
         )}
 
