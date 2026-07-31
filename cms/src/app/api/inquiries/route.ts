@@ -8,9 +8,49 @@ const InquirySchema = z.object({
   message: z.string().min(10).max(2000).trim(),
 })
 
-// Normalizes an Indian phone number into WhatsApp's expected format: digits only,
-// with country code, no '+', no spaces/dashes. e.g. "+91 98765-43210" -> "919876543210"
-// and "9876543210" -> "919876543210".
+async function syncToHubSpot(data: { name: string; email: string; phone: string; message: string }) {
+  const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN
+  if (!HUBSPOT_TOKEN) {
+    console.warn('HubSpot sync skipped: missing env var')
+    return
+  }
+  try {
+    const [firstname, ...rest] = data.name.trim().split(' ')
+    const lastname = rest.join(' ')
+
+    const res = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${HUBSPOT_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        properties: {
+          email: data.email,
+          firstname,
+          lastname: lastname || '',
+          phone: data.phone || '',
+          message: data.message,
+        },
+      }),
+    })
+
+    if (!res.ok) {
+      const errText = await res.text()
+      // HubSpot returns 409 if a contact with this email already exists —
+      // that's expected on repeat inquiries, not a real failure.
+      if (res.status === 409) {
+        console.log('HubSpot contact already exists for this email, skipping create.')
+      } else {
+        console.error('HubSpot sync error:', errText)
+      }
+    }
+  } catch (err) {
+    console.error('HubSpot sync error:', err)
+  }
+}
+
+
 function normalizeIndianPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '')
   if (digits.length === 10) return `91${digits}`
@@ -162,6 +202,12 @@ export async function POST(req: Request) {
       }),
       sendCustomerEmailConfirmation({ name: result.data.name, email: result.data.email }),
       sendCustomerWhatsAppNotification({ name: result.data.name, phone: result.data.phone || '' }),
+      syncToHubSpot({
+        name: result.data.name,
+        email: result.data.email,
+        phone: result.data.phone || '',
+        message: result.data.message,
+      }),
     ])
 
     return Response.json({ success: true, id: String(data.data?.id) }, { status: 201 })
