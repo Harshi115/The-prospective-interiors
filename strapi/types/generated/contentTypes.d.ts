@@ -451,10 +451,13 @@ export interface ApiAboutpageAboutpage extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    contactEmail: Schema.Attribute.Email;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     ctaheading: Schema.Attribute.String;
+    ctaHeading: Schema.Attribute.String;
+    ctaimage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     ctaImage: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
       true
@@ -572,9 +575,12 @@ export interface ApiCareersPageCareersPage extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    contactEmail: Schema.Attribute.Email;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    ctaHeading: Schema.Attribute.String;
+    ctaImage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     heroHeading: Schema.Attribute.String;
     heroImage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     heroLabel: Schema.Attribute.String;
@@ -590,6 +596,52 @@ export interface ApiCareersPageCareersPage extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiContactPageContactPage extends Struct.CollectionTypeSchema {
+  collectionName: 'contact_pages';
+  info: {
+    displayName: 'contact-page';
+    pluralName: 'contact-pages';
+    singularName: 'contact-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email;
+    heroHeading: Schema.Attribute.String;
+    heroImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    heroLabel: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::contact-page.contact-page'
+    > &
+      Schema.Attribute.Private;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    studioAddress: Schema.Attribute.String;
+    studioHeading: Schema.Attribute.String;
+    studioHours: Schema.Attribute.String;
+    studioImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    studioImageCaption: Schema.Attribute.String;
+    studioLabel: Schema.Attribute.String;
+    studioText: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    whatsappNumber: Schema.Attribute.String;
   };
 }
 
@@ -1510,6 +1562,7 @@ declare module '@strapi/strapi' {
       'api::application.application': ApiApplicationApplication;
       'api::career-value.career-value': ApiCareerValueCareerValue;
       'api::careers-page.careers-page': ApiCareersPageCareersPage;
+      'api::contact-page.contact-page': ApiContactPageContactPage;
       'api::faq.faq': ApiFaqFaq;
       'api::gallery.gallery': ApiGalleryGallery;
       'api::inquiry.inquiry': ApiInquiryInquiry;

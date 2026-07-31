@@ -39,6 +39,22 @@
                 "videos",
                 "audios"
             ]
+        },
+        "ctaHeading": {
+            "type": "string"
+        },
+        "ctaImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "contactEmail": {
+            "type": "email"
         }
     }
 }

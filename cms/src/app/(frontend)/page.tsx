@@ -8,8 +8,7 @@ export const metadata = {
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
-// Empty defaults only used if Strapi is completely unreachable — everything
-// on the page is meant to come from the CMS, nothing is hardcoded here.
+
 const FALLBACK_DATA = {
   heroTagline: '',
   heroHeadline: '',
@@ -68,11 +67,11 @@ export default async function HomePage() {
     const galleryJson     = galleryRes.ok     ? await galleryRes.json()     : { data: [] }
     const journeyJson     = journeyRes.ok     ? await journeyRes.json()     : { data: [] }
 
-    // Strapi v5 — data directly on object, no .attributes needed
+   
     const page = pagesJson?.data?.[0] ?? {}
 
     const getImgUrl = (media: any) => {
-      // Strapi v5 image format — uses STRAPI_PUBLIC so the browser can actually load the image.
+      
       const url = media?.url ?? media?.data?.attributes?.url ?? ''
       return url.startsWith('http') ? url : url ? `${STRAPI_PUBLIC}${url}` : ''
     }
@@ -91,14 +90,12 @@ export default async function HomePage() {
 
     const allProjects = (allProjectsJson?.data ?? []).map(mapProject)
     const featuredProjects = (featuredJson?.data ?? []).map(mapProject)
-    // Fall back to all projects for the Featured Work section too, if none are marked featured.
+    
     const projects = featuredProjects.length > 0 ? featuredProjects : allProjects.slice(0, 3)
 
-    // Hero slideshow — every project's photo, no caption/link shown (just clean images).
     const heroImages = allProjects.map((p: ReturnType<typeof mapProject>) => p.heroImage).filter(Boolean)
 
-    // Everything below reads straight from Strapi with '' as the only fallback —
-    // if a field is empty in the CMS, it will render empty on the page (no hardcoded text).
+    
     const data = {
       heroTagline:    page.heroTagline    ?? '',
       heroHeadline:   page.heroHeadline   ?? '',
@@ -151,8 +148,8 @@ export default async function HomePage() {
 
     return <HomeClient data={data} />
   } catch (error) {
-    // If Strapi is completely unreachable (e.g. cold-starting on a free tier),
-    // render with empty fields rather than crashing the whole build.
+    
+
     console.error('Home page error (Strapi unreachable, rendering empty):', error)
     return <HomeClient data={FALLBACK_DATA} />
   }

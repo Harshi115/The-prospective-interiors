@@ -96,6 +96,22 @@
     },
     "heroHeading": {
       "type": "string"
+    },
+    "ctaHeading": {
+      "type": "string"
+    },
+    "contactEmail": {
+      "type": "email"
+    },
+    "ctaimage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

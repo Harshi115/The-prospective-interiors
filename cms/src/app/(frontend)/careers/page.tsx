@@ -25,11 +25,16 @@ export default async function CareersPage() {
     heroSubtext: '',
     heroImage: '',
     sideImage: '',
+    ctaHeading: '',
+    ctaImage: '',
+    contactEmail: '',
+    contactPhone: '',
+    contactHours: '',
   }
 
   try {
-    // Populate BOTH heroImage and sideImage from Strapi.
-    const res = await fetch(`${STRAPI}/api/careers-pages?populate[0]=heroImage&populate[1]=sideImage`, { headers, next: { revalidate: 60 } })
+    // Populate heroImage, sideImage, AND ctaImage from Strapi.
+    const res = await fetch(`${STRAPI}/api/careers-pages?populate[0]=heroImage&populate[1]=sideImage&populate[2]=ctaImage`, { headers, next: { revalidate: 60 } })
     if (res.ok) {
       const json = await res.json()
       const data = json?.data?.[0] ?? {}
@@ -38,6 +43,7 @@ export default async function CareersPage() {
         ...data,
         heroImage: getImgUrl(data.heroImage) || '',
         sideImage: getImgUrl(data.sideImage) || '',
+        ctaImage: getImgUrl(data.ctaImage) || '',
       }
     }
   } catch (error) {

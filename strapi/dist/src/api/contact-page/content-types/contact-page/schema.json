@@ -1,0 +1,68 @@
+{
+    "kind": "collectionType",
+    "collectionName": "contact_pages",
+    "info": {
+        "singularName": "contact-page",
+        "pluralName": "contact-pages",
+        "displayName": "contact-page"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "heroLabel": {
+            "type": "string"
+        },
+        "heroHeading": {
+            "type": "string"
+        },
+        "heroImage": {
+            "type": "media",
+            "multiple": true,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "phone": {
+            "type": "string"
+        },
+        "email": {
+            "type": "email"
+        },
+        "whatsappNumber": {
+            "type": "string"
+        },
+        "studioLabel": {
+            "type": "string"
+        },
+        "studioHeading": {
+            "type": "string"
+        },
+        "studioText": {
+            "type": "text"
+        },
+        "studioAddress": {
+            "type": "string"
+        },
+        "studioHours": {
+            "type": "string"
+        },
+        "studioImage": {
+            "type": "media",
+            "multiple": true,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "studioImageCaption": {
+            "type": "string"
+        }
+    }
+}
