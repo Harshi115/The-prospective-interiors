@@ -1,9 +1,0 @@
-node_modules
-.cache
-.tmp
-build
-.git
-.env
-npm-debug.log
-README.md
-.vscode

@@ -1,9 +1,8 @@
 node_modules
-.cache
-.tmp
-build
+.next
 .git
 .env
+.env.local
 npm-debug.log
 README.md
 .vscode

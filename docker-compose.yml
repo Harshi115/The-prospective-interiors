@@ -2,45 +2,42 @@ version: '3.8'
 
 services:
   # Strapi CMS
-  strapi:
+  cms:
     build:
-      context: ./strapi
+      context: ./cms
       dockerfile: Dockerfile
     container_name: tpi-strapi
     command: npm run develop
     restart: unless-stopped
-    env_file: ./strapi/.env
+    env_file: ./cms/.env
     environment:
       DATABASE_CLIENT: sqlite
       DATABASE_FILENAME: .tmp/data.db
       NODE_ENV: development
     volumes:
-      - ./strapi:/app
+      - ./cms:/app
       - /app/node_modules
-      
     ports:
       - '1337:1337'
     networks:
       - tpi-network
 
   # Next.js Frontend
-  nextjs:
+  frontend:
     build:
-      context: ./cms
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: tpi-frontend
     restart: unless-stopped
     environment:
-      STRAPI_INTERNAL_URL: http://strapi:1337
+      STRAPI_INTERNAL_URL: http://cms:1337
       NEXT_PUBLIC_STRAPI_URL: http://localhost:1337
     ports:
       - '3000:3000'
     depends_on:
-      - strapi
+      - cms
     networks:
       - tpi-network
-
-
 
 networks:
   tpi-network:

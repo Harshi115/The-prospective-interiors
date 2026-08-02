@@ -1,0 +1,28 @@
+# Dependencies
+**/node_modules/
+
+# Environment files — never commit real secrets, only .env.example
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Build output
+**/.next/
+**/dist/
+**/build/
+
+# Strapi
+**/.tmp/
+**/.cache/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Large backup/dump files — these should never live in git.
+# Store them in external/cloud storage instead.
+*.sql
+*.tar.gz
+*.dump
