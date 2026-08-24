@@ -60,7 +60,7 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
   const [err, setErr] = useState('')
   const [foc, setFoc] = useState<string | null>(null)
 
-  // Dark mode removed â€” site is light-only for now.
+  // Dark mode removed — site is light-only for now.
   useEffect(() => {
     setMounted(true)
     // Always start in the premium dark theme regardless of any previously saved preference.
@@ -198,9 +198,9 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
             <div style={{ width: 44, height: 2, background: GOLD, marginTop: 24, marginBottom: 4 }} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 24 }}>
               {[
-                phone ? ['ðŸ“ž', phone, `tel:${phone.replace(/\s/g, '')}`] : null,
-                email ? ['âœ‰ï¸', email, `mailto:${email}`] : null,
-                whatsappNumber ? ['ðŸ’¬', 'Chat on WhatsApp', `https://wa.me/${whatsappNumber}`] : null,
+                phone ? ['📞', phone, `tel:${phone.replace(/\s/g, '')}`] : null,
+                email ? ['✉️', email, `mailto:${email}`] : null,
+                whatsappNumber ? ['💬', 'Chat on WhatsApp', `https://wa.me/${whatsappNumber}`] : null,
               ].filter((x): x is [string, string, string] => x !== null).map(([icon, label, href]) => (
                 <a key={label} href={href} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'rgba(255,255,255,.92)', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 100, padding: '9px 18px', textDecoration: 'none', backdropFilter: 'blur(6px)', transition: 'border-color .2s,background .2s' }}
                   className="hero-chip">
@@ -215,7 +215,7 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
         <section className="pad" style={{ padding: '96px 72px', maxWidth: 1240, margin: '0 auto' }}>
           <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', gap: 64, alignItems: 'start' }}>
 
-            {/* LEFT â€” Studio info + accent image */}
+            {/* LEFT — Studio info + accent image */}
             <FadeIn>
               <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>{studioLabel}</p>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 400, color: t.ink, lineHeight: 1.2, marginBottom: 28 }}>{studioHeading}</h2>
@@ -223,10 +223,10 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
 
               <div style={{ background: DARK, borderRadius: 14, padding: '32px 32px 8px', marginBottom: 32 }}>
                 {[
-                  ['ðŸ“', 'Studio Address', studioAddress],
-                  ['âœ‰ï¸', 'Email', email],
-                  ['ðŸ“ž', 'Phone', phone],
-                  ['ðŸ•', 'Studio Hours', studioHours],
+                  ['📍', 'Studio Address', studioAddress],
+                  ['✉️', 'Email', email],
+                  ['📞', 'Phone', phone],
+                  ['🕐', 'Studio Hours', studioHours],
                 ].filter(([, , val]) => val).map(([icon, label, val]) => (
                   <div key={label} className="info-row">
                     <span style={{ fontSize: 18, flexShrink: 0 }}>{icon}</span>
@@ -248,12 +248,12 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
               )}
             </FadeIn>
 
-            {/* RIGHT â€” FORM */}
+            {/* RIGHT — FORM */}
             <FadeIn delay={0.15}>
               <div style={{ background: t.surface, borderRadius: 16, padding: '48px 44px', border: `1px solid ${t.border}`, boxShadow: dark ? 'none' : '0 8px 48px rgba(26,24,20,.06)' }}>
                 {status === 'success' ? (
                   <div style={{ textAlign: 'center', padding: '48px 0', animation: 'fadeUp .5s ease' }}>
-                    <div style={{ width: 72, height: 72, borderRadius: 36, background: `${GOLD}18`, border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px', fontSize: 28, color: GOLD }}>âœ“</div>
+                    <div style={{ width: 72, height: 72, borderRadius: 36, background: `${GOLD}18`, border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px', fontSize: 28, color: GOLD }}>✓</div>
                     <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', fontWeight: 400, color: t.ink, marginBottom: 14 }}>Enquiry Received!</h3>
                     <p style={{ fontSize: 15, color: t.muted, lineHeight: 1.85, marginBottom: 36 }}>Thank you for reaching out. A member of our team will get back to you within one working day.</p>
                     <button onClick={() => setStatus('idle')} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', background: 'none', border: `1.5px solid ${t.border}`, color: t.muted, padding: '11px 28px', cursor: 'pointer', borderRadius: 8 }}>Send Another Enquiry</button>
@@ -299,7 +299,7 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
                       {err && <p style={{ fontSize: 13, color: '#c45a3a', fontWeight: 600 }}>{err}</p>}
 
                       <button type="submit" className="submit-btn" disabled={status === 'loading'}>
-                        {status === 'loading' ? 'Sending...' : 'Send Enquiry â†’'}
+                        {status === 'loading' ? 'Sending...' : 'Send Enquiry →'}
                       </button>
 
                       <p style={{ fontSize: 12, color: t.muted, textAlign: 'center', lineHeight: 1.7 }}>
@@ -312,9 +312,9 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
 
               <div className="hl-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 28 }}>
                 {[
-                  ['â±ï¸', 'Quick Response', 'Reply within 1 working day'],
-                  ['ðŸ“', 'Free Consultation', 'First site visit on us'],
-                  ['ðŸŽ¨', 'Dedicated Designer', 'One point of contact'],
+                  ['⏱️', 'Quick Response', 'Reply within 1 working day'],
+                  ['📐', 'Free Consultation', 'First site visit on us'],
+                  ['🎨', 'Dedicated Designer', 'One point of contact'],
                 ].map(([icon, title, sub]) => (
                   <div key={title} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: '20px 16px', textAlign: 'center' }}>
                     <div style={{ fontSize: 20, marginBottom: 10 }}>{icon}</div>
@@ -331,7 +331,7 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
         {studioAddress && (
           <section style={{ position: 'relative', height: 440, overflow: 'hidden', borderTop: `1px solid ${t.border}`, borderBottom: `1px solid ${t.border}` }}>
             <iframe
-              title="The Prospective Interiors â€” Studio Location"
+              title="The Prospective Interiors — Studio Location"
               src={`https://www.google.com/maps?q=${encodeURIComponent(studioAddress)}&output=embed`}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, filter: dark ? 'grayscale(.4) invert(.92) contrast(.9)' : 'none' }}
               loading="lazy"
@@ -386,8 +386,8 @@ export default function ContactClient({ pageContent, logoUrl, logoAlt }: { pageC
           </div>
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>Â© 2026 The Prospective Interiors Â· All rights reserved</span>
-            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India Â· Est. 2004</span>
+            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
+            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India · Est. 2004</span>
           </div>
         </footer>
       </div>

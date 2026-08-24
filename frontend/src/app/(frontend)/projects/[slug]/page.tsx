@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const p = json?.data?.[0]
     if (!p) return { title: 'Project Not Found' }
     return {
-      title: `${p.title} â€” The Prospective Interiors`,
+      title: `${p.title} — The Prospective Interiors`,
       description: `${p.sector} interior design project in ${p.location}.`,
     }
   } catch {
@@ -83,7 +83,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         .filter(Boolean),
     }
 
-    // Related projects â€” same sector
+    // Related projects — same sector
     const relRes = await fetch(
       `${STRAPI}/api/projects?filters[sector][$eq]=${raw.sector}&filters[slug][$ne]=${slug}&pagination[limit]=3&populate[heroImage]=true`,
       { cache: 'no-store' }

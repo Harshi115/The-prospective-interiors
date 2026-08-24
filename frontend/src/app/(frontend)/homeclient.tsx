@@ -35,7 +35,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const countsRef = useRef(false)
 
-  // Dark mode removed â€” site is light-only for now.
+  // Dark mode removed — site is light-only for now.
 
   useEffect(() => {
     setMounted(true)
@@ -224,7 +224,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
               {data.heroSubtext}
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              <Link href="/projects" className="btn-gold">Explore Our Work â†’</Link>
+              <Link href="/projects" className="btn-gold">Explore Our Work →</Link>
               <Link href="/contact" className="btn-outline">Get in Touch</Link>
             </div>
           </div>
@@ -243,16 +243,16 @@ export default function HomeClient({ data }: { data: HomeData }) {
 {/* ABOUT THE FIRM */}
         <section className="pad about-firm" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}`, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 72, alignItems: 'center' }}>
           <FadeIn>
-            <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>â€” Who We Are â€”</p>
+            <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 16, fontWeight: 600 }}>— Who We Are —</p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.9rem,3vw,2.8rem)', fontStyle: 'italic', fontWeight: 400, color: t.ink, lineHeight: 1.35, marginBottom: 28 }}>
               {data.philosophyText}
             </h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 24px', marginBottom: 28 }}>
-              <span style={{ fontSize: 13, color: t.ink, fontWeight: 600 }}>Est. 2004 Â· Pune, India</span>
+              <span style={{ fontSize: 13, color: t.ink, fontWeight: 600 }}>Est. 2004 · Pune, India</span>
               <span style={{ color: t.border }}>|</span>
               <span style={{ fontSize: 13, color: t.muted }}>Led by Principal Designer <span style={{ color: t.ink, fontWeight: 600 }}>Prashant Bhandiya</span></span>
             </div>
-            <Link href="/about" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3 }}>Learn About Our Studio â†’</Link>
+            <Link href="/about" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3 }}>Learn About Our Studio →</Link>
           </FadeIn>
           <FadeIn delay={0.15}>
             <div style={{ background: t.subtle, border: `1px solid ${t.border}`, borderRadius: 12, padding: '36px 32px' }}>
@@ -273,11 +273,11 @@ export default function HomeClient({ data }: { data: HomeData }) {
             <FadeIn>
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 60, flexWrap: 'wrap', gap: 24 }}>
                 <div>
-                  <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>â€” Featured Work â€”</p>
+                  <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Featured Work —</p>
                   <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem,4vw,3.8rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1 }}>Spaces We&apos;re Proud Of</h2>
-                  <p style={{ fontSize: 13.5, color: t.muted, maxWidth: 460, lineHeight: 1.7, marginTop: 14 }}>A curated look at our portfolio â€” favourites pulled from 200+ projects across residential, hospitality and retail sectors.</p>
+                  <p style={{ fontSize: 13.5, color: t.muted, maxWidth: 460, lineHeight: 1.7, marginTop: 14 }}>A curated look at our portfolio — favourites pulled from 200+ projects across residential, hospitality and retail sectors.</p>
                 </div>
-                <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3, whiteSpace: 'nowrap' }}>View All Projects â†’</Link>
+                <Link href="/projects" style={{ fontSize: 13, fontWeight: 600, color: GOLD, borderBottom: `1px solid ${GOLD}50`, paddingBottom: 3, whiteSpace: 'nowrap' }}>View All Projects →</Link>
               </div>
             </FadeIn>
 
@@ -297,8 +297,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
                         {p.sector && <p style={{ fontSize: 9.5, letterSpacing: '.18em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginBottom: 8 }}>{p.sector}</p>}
                         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: big ? 'clamp(1.6rem,2.4vw,2.1rem)' : 'clamp(1.3rem,1.8vw,1.6rem)', fontWeight: 500, color: '#fff', lineHeight: 1.15, marginBottom: 8 }}>{p.title}</h3>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                          {p.location && <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,.68)' }}>ðŸ“ {p.location}</p>}
-                          <span className="bento-card-arrow" style={{ fontSize: 11, color: GOLD, fontWeight: 600, opacity: 0, transform: 'translateX(-6px)', transition: 'opacity .3s ease, transform .3s ease', whiteSpace: 'nowrap' }}>View â†’</span>
+                          {p.location && <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,.68)' }}>📍 {p.location}</p>}
+                          <span className="bento-card-arrow" style={{ fontSize: 11, color: GOLD, fontWeight: 600, opacity: 0, transform: 'translateX(-6px)', transition: 'opacity .3s ease, transform .3s ease', whiteSpace: 'nowrap' }}>View →</span>
                         </div>
                       </div>
                     </Link>
@@ -398,9 +398,9 @@ export default function HomeClient({ data }: { data: HomeData }) {
         <section className="pad" style={{ padding: '100px 72px', borderBottom: `1px solid ${t.border}` }}>
           <FadeIn>
             <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 56px' }}>
-              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>â€” Our Portfolio â€”</p>
+              <p style={{ fontSize: 11, letterSpacing: '.22em', textTransform: 'uppercase', color: GOLD, marginBottom: 12, fontWeight: 600 }}>— Our Portfolio —</p>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.2rem,3.8vw,3.4rem)', fontWeight: 400, color: t.ink, lineHeight: 1.1, marginBottom: 16 }}>A Glimpse Into Our World</h2>
-              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>Moments from the homes we&apos;ve shaped â€” texture, light and detail, captured room by room.</p>
+              <p style={{ fontSize: 13.5, color: t.muted, lineHeight: 1.7 }}>Moments from the homes we&apos;ve shaped — texture, light and detail, captured room by room.</p>
             </div>
           </FadeIn>
           <div className="gallery-masonry" style={{ columnCount: 3, columnGap: 18, maxWidth: 1280, margin: '0 auto' }}>
@@ -428,7 +428,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
                 {data.ctaHeading}
               </h2>
               <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/contact" className="btn-gold">Start a Conversation â†’</Link>
+                <Link href="/contact" className="btn-gold">Start a Conversation →</Link>
                 <Link href="/projects" className="btn-outline">View All Projects</Link>
               </div>
             </FadeIn>
@@ -478,8 +478,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
           </div>
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>Â© 2026 The Prospective Interiors Â· All rights reserved</span>
-            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India Â· Est. 2004</span>
+            <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.25)' }}>© 2026 The Prospective Interiors · All rights reserved</span>
+            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.18)', letterSpacing: '.04em' }}>Pune, India · Est. 2004</span>
           </div>
         </footer>
 
