@@ -47,14 +47,13 @@ interface CareersPageContent {
   contactHours?: string
 }
 
-export default function CareerClient({ pageContent, stats = [] }: { pageContent?: CareersPageContent; stats?: { label: string; value: string }[] } = {}) {
+export default function CareerClient({ pageContent, stats = [], logoUrl, logoAlt }: { pageContent?: CareersPageContent; stats?: { label: string; value: string }[]; logoUrl?: string; logoAlt?: string } = {}) {
   const pc = pageContent || {}
   const contactEmail = pc.contactEmail || ''
   const contactPhone = pc.contactPhone || ''
   const contactHours = pc.contactHours || ''
   const dark = false
   const [mounted, setMounted] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
   const [openings, setOpenings] = useState<{ id: number; title: string; type: string; location: string; experience: string; department: string }[]>([])
   const [values, setValues] = useState<{ icon: string; title: string; desc: string }[]>([])
   const [selected, setSelected] = useState<{ id: number; title: string; type: string; location: string; experience: string; department: string } | null>(null)
@@ -102,7 +101,6 @@ export default function CareerClient({ pageContent, stats = [] }: { pageContent?
       })
       .catch(() => {})
   }, [])
-  useEffect(() => { const fn = () => setScrolled(window.scrollY > 60); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn) }, [])
 
   const ch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
@@ -210,11 +208,17 @@ export default function CareerClient({ pageContent, stats = [] }: { pageContent?
         {/* NAV */}
         <header style={{ position: 'sticky', top: 0, zIndex: 300, background: t.bg, borderBottom: `1px solid ${t.border}`, padding: '0 56px', height: 68, display: 'flex', alignItems: 'center', gap: 40 }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 1, height: 26, background: GOLD, opacity: .5 }} />
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
-            </div>
+            {logoUrl ? (
+              <img src={logoUrl} alt={logoAlt || 'The Prospective Interiors'} style={{ height: 64, width: 'auto', display: 'block' }} />
+            ) : (
+              <>
+                <div style={{ width: 1, height: 26, background: GOLD, opacity: .5 }} />
+                <div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
+                  <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+                </div>
+              </>
+            )}
           </Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
             {([['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][]).map(([href, label]) => (
@@ -450,8 +454,14 @@ export default function CareerClient({ pageContent, stats = [] }: { pageContent?
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} />
                 <div>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div>
-                  <div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+                  {logoUrl ? (
+                    <img src={logoUrl} alt={logoAlt || 'The Prospective Interiors'} style={{ height: 52, width: 'auto', display: 'block' }} />
+                  ) : (
+                    <>
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div>
+                      <div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+                    </>
+                  )}
                 </div>
               </div>
               <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.75, maxWidth: 300 }}>A multi-disciplinary interior design and architecture firm creating meaningful spaces across India since 2004.</p>

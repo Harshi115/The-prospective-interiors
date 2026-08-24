@@ -1,4 +1,5 @@
 import ProjectsClient from './ProjectsClient'
+import { getSiteSettings } from '../../../lib/site-settings'
 
 export const metadata = {
   title: 'Projects — The Prospective Interiors',
@@ -23,9 +24,10 @@ export default async function ProjectsPage() {
 
   // Fetch page content (label/heading/subtext/sectors/heroImage) and the project list IN PARALLEL,
   // server-side, so the page arrives already populated — no client-side loading gap.
-  const [pageRes, projectsRes] = await Promise.all([
+  const [pageRes, projectsRes, siteSettings] = await Promise.all([
     fetch(`${STRAPI}/api/projetspages?populate=heroImage`, { headers, next: { revalidate: 60 } }).catch(() => null),
     fetch(`${STRAPI}/api/projects?populate[heroImage]=true&populate[gallery]=true&pagination[limit]=100`, { headers, next: { revalidate: 60 } }).catch(() => null),
+    getSiteSettings(),
   ])
 
   const getImgUrl = (media: any) => {
@@ -76,5 +78,5 @@ export default async function ProjectsPage() {
     }
   }
 
-  return <ProjectsClient projects={projects} pageContent={pageContent} />
+  return <ProjectsClient projects={projects} pageContent={pageContent} logoUrl={siteSettings.logoUrl} logoAlt={siteSettings.logoAlt} />
 }

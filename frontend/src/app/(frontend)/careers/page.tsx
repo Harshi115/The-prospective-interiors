@@ -1,4 +1,5 @@
 import CareerClient from './careersclient'
+import { getSiteSettings } from '../../../lib/site-settings'
 
 export const metadata = {
   title: 'Careers — The Prospective Interiors',
@@ -61,5 +62,7 @@ export default async function CareersPage() {
     console.error('Careers page stats fetch error:', error)
   }
 
-  return <CareerClient pageContent={pageContent} stats={stats} />
+  const siteSettings = await getSiteSettings()
+
+  return <CareerClient pageContent={pageContent} stats={stats} logoUrl={siteSettings.logoUrl} logoAlt={siteSettings.logoAlt} />
 }

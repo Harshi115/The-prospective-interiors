@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import ProjectDetailClient from './ProjectDetailClient'
+import { getSiteSettings } from '../../../../lib/site-settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,7 +101,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       heroImage: getImgUrl(r.heroImage),
     }))
 
-    return <ProjectDetailClient project={project} related={related} />
+    const siteSettings = await getSiteSettings()
+
+    return <ProjectDetailClient project={project} related={related} logoUrl={siteSettings.logoUrl} logoAlt={siteSettings.logoAlt} />
   } catch (error) {
     console.error('Project detail error:', error)
     notFound()

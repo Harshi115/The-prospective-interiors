@@ -15,7 +15,7 @@ interface Related { id: string; title: string; slug: string; location: string; y
 
 
 
-export default function ProjectDetailClient({ project: initialProject, related }: { project: Project; related: Related[] }) {
+export default function ProjectDetailClient({ project: initialProject, related, logoUrl, logoAlt }: { project: Project; related: Related[]; logoUrl?: string; logoAlt?: string }) {
   const [project] = useState<Project>(initialProject)
   const dark = false
   const [mounted, setMounted] = useState(false)
@@ -105,11 +105,17 @@ export default function ProjectDetailClient({ project: initialProject, related }
         {/* NAV */}
         <header style={{ position: 'sticky', top: 0, zIndex: 300, background: t.bg, borderBottom: `1px solid ${t.border}`, padding: '0 56px', height: 68, display: 'flex', alignItems: 'center', gap: 40 }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 1, height: 26, background: GOLD, opacity: .5 }} />
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
-            </div>
+            {logoUrl ? (
+              <img src={logoUrl} alt={logoAlt || 'The Prospective Interiors'} style={{ height: 64, width: 'auto', display: 'block' }} />
+            ) : (
+              <>
+                <div style={{ width: 1, height: 26, background: GOLD, opacity: .5 }} />
+                <div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 500, color: t.ink, lineHeight: 1 }}>The Prospective</div>
+                  <div style={{ fontSize: 10.5, letterSpacing: '.34em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div>
+                </div>
+              </>
+            )}
           </Link>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 32 }}>
             <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
@@ -289,7 +295,7 @@ export default function ProjectDetailClient({ project: initialProject, related }
         {/* FOOTER */}
         <footer style={{ background: dark ? '#0a0908' : DARK, color: '#f0ebe3', padding: '72px 72px 48px' }}>
           <div className="ft-g" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 48, marginBottom: 56 }}>
-            <div><div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}><div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} /><div><div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div><div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div></div></div><p style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', lineHeight: 1.85, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design firm creating meaningful spaces across India since 2004.</p></div>
+            <div><div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}><div style={{ width: 1, height: 30, background: GOLD, opacity: .6 }} /><div>{logoUrl ? (<img src={logoUrl} alt={logoAlt || 'The Prospective Interiors'} style={{ height: 52, width: 'auto', display: 'block' }} />) : (<><div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem', color: '#f0ebe3', lineHeight: 1 }}>The Prospective</div><div style={{ fontSize: 10, letterSpacing: '.32em', textTransform: 'uppercase', color: GOLD, fontWeight: 700, marginTop: 5 }}>Interiors</div></>)}</div></div><p style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', lineHeight: 1.85, maxWidth: 300, marginTop: 20 }}>A multi-disciplinary interior design firm creating meaningful spaces across India since 2004.</p></div>
             {[
               { t: 'Navigate', items: [['/', 'Home'], ['/projects', 'Projects'], ['/about', 'About'], ['/careers', 'Careers'], ['/contact', 'Contact']] as [string, string][] },
               { t: 'Studio', items: [['#', '101, Design House'], ['#', 'Baner Road, Pune'], ['#', 'Maharashtra 411045']] as [string, string][] },

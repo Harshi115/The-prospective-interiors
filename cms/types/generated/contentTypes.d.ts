@@ -961,6 +961,35 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSiteSettingSiteSetting extends Struct.SingleTypeSchema {
+  collectionName: 'site_settings';
+  info: {
+    displayName: 'Site Settings';
+    pluralName: 'site-settings';
+    singularName: 'site-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::site-setting.site-setting'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    logoAltText: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStatStat extends Struct.CollectionTypeSchema {
   collectionName: 'stats';
   info: {
@@ -1572,6 +1601,7 @@ declare module '@strapi/strapi' {
       'api::project.project': ApiProjectProject;
       'api::projetspage.projetspage': ApiProjetspageProjetspage;
       'api::service.service': ApiServiceService;
+      'api::site-setting.site-setting': ApiSiteSettingSiteSetting;
       'api::stat.stat': ApiStatStat;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
       'api::value.value': ApiValueValue;

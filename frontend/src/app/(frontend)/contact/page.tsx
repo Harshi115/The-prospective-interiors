@@ -1,4 +1,5 @@
 import ContactClient from './contactclient'
+import { getSiteSettings } from '../../../lib/site-settings'
 
 export const metadata = {
   title: 'Contact — The Prospective Interiors',
@@ -40,5 +41,7 @@ export default async function ContactPage() {
     console.error('Contact page content fetch error (using fallback text):', error)
   }
 
-  return <ContactClient pageContent={pageContent} />
+  const siteSettings = await getSiteSettings()
+
+  return <ContactClient pageContent={pageContent} logoUrl={siteSettings.logoUrl} logoAlt={siteSettings.logoAlt} />
 }

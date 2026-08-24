@@ -1,12 +1,10 @@
 import type { Core } from '@strapi/strapi';
-const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => ({
+const config = (): Core.Config.Plugin => ({
   upload: {
     config: {
-      provider: 'cloudinary',
+      provider: 'local',
       providerOptions: {
-        cloud_name: env('CLOUDINARY_NAME'),
-        api_key: env('CLOUDINARY_KEY'),
-        api_secret: env('CLOUDINARY_SECRET'),
+        sizeLimit: 100 * 1024 * 1024, // 100mb -- increase if needed for large hero images
       },
       actionOptions: {
         upload: {},

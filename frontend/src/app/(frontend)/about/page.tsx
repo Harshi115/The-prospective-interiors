@@ -1,4 +1,5 @@
 import AboutClient from './AboutClient'
+import { getSiteSettings } from '../../../lib/site-settings'
 
 export const metadata = {
   title: 'About — The Prospective Interiors',
@@ -84,16 +85,19 @@ export default async function AboutPage() {
     console.error('About page content fetch error (using fallback text):', error)
   }
 
-  const [services, values, faqs, stats] = await Promise.all([
+  const [services, values, faqs, stats, siteSettings] = await Promise.all([
     fetchList(STRAPI, headers, 'services'),
-    fetchList(STRAPI, headers, 'values'), // ⚠️ check your actual collection's API ID in Strapi and rename if different
+    fetchList(STRAPI, headers, 'values'), // check your actual collection's API ID in Strapi and rename if different
     fetchList(STRAPI, headers, 'faqs'),
     fetchList(STRAPI, headers, 'stats'),
+    getSiteSettings(),
   ])
 
   return (
     <AboutClient
       pageContent={pageContent}
+      logoUrl={siteSettings.logoUrl}
+      logoAlt={siteSettings.logoAlt}
       services={services.map((s: any) => ({ id: String(s.id), title: s.title, description: s.description }))}
       values={values.map((v: any) => ({ id: String(v.id), title: v.title, description: v.description }))}
       faqs={faqs.map((f: any) => ({ id: String(f.id), q: f.question, a: f.answer }))}

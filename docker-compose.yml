@@ -7,16 +7,18 @@ services:
       context: ./cms
       dockerfile: Dockerfile
     container_name: tpi-strapi
-    command: npm run develop
     restart: unless-stopped
     env_file: ./cms/.env
     environment:
       DATABASE_CLIENT: sqlite
       DATABASE_FILENAME: .tmp/data.db
-      NODE_ENV: development
+      NODE_ENV: production
     volumes:
-      - ./cms:/app
-      - /app/node_modules
+      # Persist the SQLite database and uploaded media across container restarts/rebuilds.
+      # (Do NOT bind-mount the whole ./cms folder here -- that's a dev-only pattern that
+      # would overwrite the production build baked into the image at build time.)
+      - cms-data:/app/.tmp
+      - cms-uploads:/app/public/uploads
     ports:
       - '1337:1337'
     networks:
@@ -31,6 +33,8 @@ services:
     restart: unless-stopped
     environment:
       STRAPI_INTERNAL_URL: http://cms:1337
+      # Replace with your VPS's public domain or IP so the browser can reach Strapi
+      # for images/API calls -- localhost only works when browsing from the server itself.
       NEXT_PUBLIC_STRAPI_URL: http://localhost:1337
     ports:
       - '3000:3000'
@@ -42,3 +46,7 @@ services:
 networks:
   tpi-network:
     driver: bridge
+
+volumes:
+  cms-data:
+  cms-uploads:

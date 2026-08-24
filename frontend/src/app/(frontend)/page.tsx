@@ -1,4 +1,5 @@
 import HomeClient from './homeclient'
+import { getSiteSettings } from '../../lib/site-settings'
 
 export const metadata = {
   title: 'The Prospective Interiors — Designing Spaces That Shape The Future',
@@ -10,6 +11,8 @@ export const dynamic = 'force-dynamic'
 
 
 const FALLBACK_DATA = {
+  logoUrl: '',
+  logoAlt: 'The Prospective Interiors',
   heroTagline: '',
   heroHeadline: '',
   heroSubtext: '',
@@ -43,6 +46,8 @@ export default async function HomePage() {
   const headers = { Authorization: `Bearer ${TOKEN}` }
 
   try {
+    const siteSettings = await getSiteSettings()
+
     const [pagesRes, statsRes, servicesRes, teamRes, allProjectsRes, featuredRes, galleryRes, journeyRes] = await Promise.all([
       fetch(`${STRAPI}/api/pages?pagination[limit]=1&populate[0]=testimonialImage&populate[1]=ctaimage&populate[2]=heroImages&populate[3]=journeyImage`, { headers, next: { revalidate: 60 } }),
       fetch(`${STRAPI}/api/stats?sort=order:asc`, { headers, next: { revalidate: 60 } }),
@@ -97,6 +102,8 @@ export default async function HomePage() {
 
     
     const data = {
+      logoUrl: siteSettings.logoUrl,
+      logoAlt: siteSettings.logoAlt,
       heroTagline:    page.heroTagline    ?? '',
       heroHeadline:   page.heroHeadline   ?? '',
       heroSubtext:    page.heroSubtext    ?? '',
