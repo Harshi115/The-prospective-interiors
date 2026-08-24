@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const p = json?.data?.[0]
     if (!p) return { title: 'Project Not Found' }
     return {
-      title: `${p.title} — The Prospective Interiors`,
+      title: `${p.title} â€” The Prospective Interiors`,
       description: `${p.sector} interior design project in ${p.location}.`,
     }
   } catch {
@@ -62,8 +62,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     const raw = json?.data?.[0]
     if (!raw) notFound()
 
-    // Helpful during setup/debugging — safe to remove once confirmed working.
-    console.log('Project raw.description from Strapi:', JSON.stringify(raw.description))
 
     const project = {
       id:          String(raw.id),
@@ -85,7 +83,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         .filter(Boolean),
     }
 
-    // Related projects — same sector
+    // Related projects â€” same sector
     const relRes = await fetch(
       `${STRAPI}/api/projects?filters[sector][$eq]=${raw.sector}&filters[slug][$ne]=${slug}&pagination[limit]=3&populate[heroImage]=true`,
       { cache: 'no-store' }

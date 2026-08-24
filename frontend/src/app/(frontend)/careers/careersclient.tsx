@@ -4,8 +4,6 @@ import Link from 'next/link'
 
 const GOLD = '#D8C3A5'
 const GOLD_HOVER = '#E4CCAA'
-const SECONDARY_ACCENT = '#A8794D'
-const CREAM = '#FAF7F1'
 const DARK = '#111315'
 
 function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
@@ -20,19 +18,6 @@ function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode
 }
 
 
-function CountUp({ value, visible }: { value: string; visible: boolean }) {
-  const [d, setD] = useState(value)
-  useEffect(() => {
-    if (!visible) return
-    const n = parseInt(value.replace(/\D/g, ''))
-    const s = value.replace(/\d/g, '')
-    if (!n) { setD(value); return }
-    let c = 0; const step = Math.ceil(n / 40)
-    const t = setInterval(() => { c = Math.min(c + step, n); setD(c + s); if (c >= n) clearInterval(t) }, 30)
-    return () => clearInterval(t)
-  }, [visible, value])
-  return <>{d}</>
-}
 
 interface CareersPageContent {
   heroLabel?: string
